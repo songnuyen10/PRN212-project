@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
+using RestaurantPOS.BusinessObjects;
 using RestaurantPOS.Services;
 using RestaurantPOS.WpfApp.MVVM;
 
@@ -14,6 +15,7 @@ public class DashboardViewModel : ViewModelBase
     public Axis[] XAxes { get; private set; } = [];
 
     public ObservableCollection<TopSellerLine> TopSellers { get; } = new();
+    public ObservableCollection<Ingredient> LowStockIngredients { get; } = new();
 
     private DateTime _fromDate = DateTime.Today.AddDays(-6);
     public DateTime FromDate
@@ -61,6 +63,12 @@ public class DashboardViewModel : ViewModelBase
         foreach (var line in _dashboardService.GetTopSellers(FromDate, toExclusive))
         {
             TopSellers.Add(line);
+        }
+
+        LowStockIngredients.Clear();
+        foreach (var ingredient in _dashboardService.GetLowStockIngredients())
+        {
+            LowStockIngredients.Add(ingredient);
         }
     }
 }

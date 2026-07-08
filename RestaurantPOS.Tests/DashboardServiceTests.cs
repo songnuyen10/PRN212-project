@@ -15,7 +15,7 @@ public class DashboardServiceTests
         repository.Seed(new Payment { AmountPaid = 45_000, PaidAt = day1 });
         repository.Seed(new Payment { AmountPaid = 55_000, PaidAt = day1.AddHours(2) });
         repository.Seed(new Payment { AmountPaid = 65_000, PaidAt = day2 });
-        var service = new DashboardService(repository);
+        var service = new DashboardService(repository, new FakeIngredientRepository());
 
         var result = service.GetDailyRevenue(day1.Date, day2.Date.AddDays(1));
 
@@ -36,11 +36,25 @@ public class DashboardServiceTests
 
         var repository = new FakePaymentRepository();
         repository.Seed(new Payment { Order = order, PaidAt = DateTime.Today });
-        var service = new DashboardService(repository);
+        var service = new DashboardService(repository, new FakeIngredientRepository());
 
         var result = service.GetTopSellers(DateTime.Today, DateTime.Today.AddDays(1));
 
         Assert.Equal("Spring Rolls", result[0].ItemName);
         Assert.Equal(5, result[0].QuantitySold);
+    }
+
+    [Fact]
+    public void GetLowStockIngredients_ReturnsOnlyIngredientsAtOrBelowThreshold()
+    {
+        var ingredientRepository = new FakeIngredientRepository();
+        ingredientRepository.Seed(new Ingredient { IngredientId = 1, IngredientName = "Rice", QuantityInStock = 2, LowStockThreshold = 5 });
+        ingredientRepository.Seed(new Ingredient { IngredientId = 2, IngredientName = "Salt", QuantityInStock = 50, LowStockThreshold = 5 });
+        var service = new DashboardService(new FakePaymentRepository(), ingredientRepository);
+
+        var result = service.GetLowStockIngredients();
+
+        Assert.Single(result);
+        Assert.Equal("Rice", result[0].IngredientName);
     }
 }
