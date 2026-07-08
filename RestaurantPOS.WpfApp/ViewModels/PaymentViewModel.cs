@@ -70,10 +70,18 @@ public class PaymentViewModel : ViewModelBase
     }
 
     // No real printer to target here — "printing" opens the generated PDF with
-    // the OS default viewer, which can print it.
+    // the OS default viewer, which can print it. No PDF viewer registered (or the
+    // temp file gone) must not crash the app, same as a BuildPdf failure above.
     public void PrintReceipt()
     {
         if (_receiptPdfPath == null) return;
-        Process.Start(new ProcessStartInfo(_receiptPdfPath) { UseShellExecute = true });
+        try
+        {
+            Process.Start(new ProcessStartInfo(_receiptPdfPath) { UseShellExecute = true });
+        }
+        catch
+        {
+            // Nothing to fall back to — the receipt PDF still exists on disk.
+        }
     }
 }
