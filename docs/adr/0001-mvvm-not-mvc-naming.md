@@ -1,0 +1,5 @@
+# Use MVVM (ViewModels), not MVC (Controllers), for the WPF layer
+
+Report 1 (proposal stage) named the planned solution projects `RestaurantPOS.Views` / `RestaurantPOS.Controllers` / `RestaurantPOS.BLL` / `RestaurantPOS.DAL` and called the architecture "MVC". Report 3 (the as-built record, written after Report 1) describes what was actually implemented: MVVM — ViewModels exposing `ObservableCollection<T>`, command bindings instead of code-behind event handlers, no `Controller` classes. WPF has no framework-level "Controller" concept; a `Controllers` project would just be renamed ViewModels wearing a stale label from before the team understood WPF idiom.
+
+Decision: use real MVVM. Project names: `RestaurantPOS.BusinessObjects`, `RestaurantPOS.DataAccessObjects`, `RestaurantPOS.Repositories`, `RestaurantPOS.Services` (= the docs' "BLL"), `RestaurantPOS.WpfApp` (Views + `MVVM/{RelayCommand,ViewModelBase}` + ViewModels). Report 1/2's "Controller"/"MVC" wording is superseded wherever it appears.

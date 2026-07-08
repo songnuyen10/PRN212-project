@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\RestaurantPOS.BusinessObjects\RestaurantPOS.BusinessObjects.csproj" />
+    <ProjectReference Include="..\RestaurantPOS.DataAccessObjects\RestaurantPOS.DataAccessObjects.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,9 @@
+CLAUDE.md
+docs/agents/
+
+# Visual Studio / .NET
+bin/
+obj/
+.vs/
+*.user
+

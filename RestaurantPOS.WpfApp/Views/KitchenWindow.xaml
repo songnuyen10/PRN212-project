@@ -1,0 +1,51 @@
+<Window x:Class="RestaurantPOS.WpfApp.Views.KitchenWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:RestaurantPOS.WpfApp.ViewModels"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        Title="Màn hình bếp" Height="560" Width="640"
+        WindowStartupLocation="CenterScreen"
+        Closed="KitchenWindow_Closed">
+    <Window.DataContext>
+        <vm:KitchenViewModel />
+    </Window.DataContext>
+    <DockPanel Margin="16">
+        <TextBlock DockPanel.Dock="Top" Text="Hàng chờ bếp (tự làm mới mỗi 10 giây)" FontSize="18" FontWeight="Bold" Margin="0,0,0,12" />
+        <ListBox ItemsSource="{Binding Queue}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="Gray" BorderThickness="0,0,0,1" Padding="0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock FontWeight="Bold">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="Bàn {0} — {1} x{2}">
+                                            <Binding Path="Order.Table.TableName" />
+                                            <Binding Path="MenuItem.ItemName" />
+                                            <Binding Path="Quantity" />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                                <TextBlock Text="{Binding Status}" Foreground="Gray" />
+                            </StackPanel>
+                            <Button Grid.Column="1" Content="Đang làm"
+                                    Command="{Binding DataContext.MarkInProgressCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    CommandParameter="{Binding}" Margin="8,0" />
+                            <Button Grid.Column="2" Content="Xong"
+                                    Command="{Binding DataContext.MarkDoneCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    CommandParameter="{Binding}"
+                                    Style="{StaticResource MaterialDesignRaisedButton}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</Window>

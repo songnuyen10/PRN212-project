@@ -1,0 +1,5 @@
+# Hash User passwords with PBKDF2 (Rfc2898DeriveBytes), not a third-party library
+
+Report 3 flagged "password hashing strategy for Users" as an open gap never resolved during development. Plaintext is not an option (security baseline, non-negotiable regardless of how small the project is). The common answer in tutorials is BCrypt.Net, but that's a new NuGet dependency for something .NET already ships: `System.Security.Cryptography.Rfc2898DeriveBytes` implements PBKDF2, is available in every target framework this project might use, and needs no package reference.
+
+Decision: `User` stores `PasswordHash` and `PasswordSalt` (both `byte[]`/`varbinary`). A random salt is generated per user via `RandomNumberGenerator`; the hash is `Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations: 100_000, HashAlgorithmName.SHA256, 32)`. Verification re-derives and compares with a constant-time check (`CryptographicOperations.FixedTimeEquals`). This is a schema-level decision (two columns, fixed-width) that's expensive to change once real user rows exist, so it's recorded here rather than re-litigated later.

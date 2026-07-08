@@ -1,0 +1,52 @@
+<Window x:Class="RestaurantPOS.WpfApp.Views.TableMapWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:RestaurantPOS.WpfApp.ViewModels"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        Title="Sơ đồ bàn" Height="520" Width="760"
+        WindowStartupLocation="CenterScreen">
+    <Window.DataContext>
+        <vm:TableMapViewModel />
+    </Window.DataContext>
+    <DockPanel Margin="16">
+        <Button DockPanel.Dock="Top" Content="Làm mới" Command="{Binding RefreshCommand}"
+                HorizontalAlignment="Left" Margin="0,0,0,12" />
+
+        <ItemsControl ItemsSource="{Binding Tables}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Width="120" Height="100" Margin="8" CornerRadius="8"
+                            MouseLeftButtonDown="Tile_MouseLeftButtonDown" Tag="{Binding}">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="#4CAF50" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Status}" Value="Occupied">
+                                        <Setter Property="Background" Value="#E53935" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Status}" Value="AwaitingPayment">
+                                        <Setter Property="Background" Value="#FFB300" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding TableName}" FontSize="20" FontWeight="Bold"
+                                       Foreground="White" HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding Capacity, StringFormat='{}{0} chỗ'}"
+                                       Foreground="White" HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding Status}" Foreground="White" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </DockPanel>
+</Window>

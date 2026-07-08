@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Publish
+        run: dotnet publish RestaurantPOS.WpfApp/RestaurantPOS.WpfApp.csproj -c Release -o publish
+
+      - name: Zip
+        run: Compress-Archive -Path publish/* -DestinationPath RestaurantPOS.zip
+        shell: pwsh
+
+      - name: Upload to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          files: RestaurantPOS.zip

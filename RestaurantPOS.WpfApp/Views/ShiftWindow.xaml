@@ -1,0 +1,36 @@
+<Window x:Class="RestaurantPOS.WpfApp.Views.ShiftWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:RestaurantPOS.WpfApp.ViewModels"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        Title="Ca làm việc" Height="480" Width="380"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Window.DataContext>
+        <vm:ShiftViewModel />
+    </Window.DataContext>
+    <StackPanel Margin="24">
+        <TextBlock Text="Ca làm việc" FontSize="18" FontWeight="Bold" Margin="0,0,0,16" />
+
+        <StackPanel Visibility="{Binding HasOpenShift, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock Text="{Binding OpenShift.OpenedAt, StringFormat='Mở ca lúc: {0:HH:mm dd/MM/yyyy}'}" Margin="0,0,0,8" />
+            <TextBlock Text="{Binding Reconciliation.OpeningCash, StringFormat='Tiền đầu ca: {0:N0} đ'}" Margin="0,0,0,4" />
+            <TextBlock Text="{Binding Reconciliation.CashPayments, StringFormat='Doanh thu tiền mặt: {0:N0} đ'}" Margin="0,0,0,4" />
+            <TextBlock Text="{Binding Reconciliation.ExpectedCash, StringFormat='Tiền dự kiến trong két: {0:N0} đ'}" FontWeight="Bold" Margin="0,0,0,16" />
+
+            <TextBlock Text="Tiền cuối ca (kiểm đếm thực tế)" Margin="0,0,0,4" />
+            <TextBox Text="{Binding ClosingCash, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8" />
+            <TextBlock Text="{Binding Variance, StringFormat='Chênh lệch: {0:N0} đ'}" Margin="0,0,0,16" />
+
+            <Button Content="Đóng ca" Command="{Binding CloseShiftCommand}" Style="{StaticResource MaterialDesignRaisedButton}" />
+        </StackPanel>
+
+        <StackPanel Visibility="{Binding HasOpenShift, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+            <TextBlock Text="Chưa mở ca." Margin="0,0,0,16" Foreground="Gray" />
+            <TextBlock Text="Tiền đầu ca" Margin="0,0,0,4" />
+            <TextBox Text="{Binding OpeningCash, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,16" />
+            <Button Content="Mở ca" Command="{Binding OpenShiftCommand}" Style="{StaticResource MaterialDesignRaisedButton}" />
+        </StackPanel>
+    </StackPanel>
+</Window>
