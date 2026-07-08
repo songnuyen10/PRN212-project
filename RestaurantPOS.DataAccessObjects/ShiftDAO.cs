@@ -32,7 +32,7 @@ public class ShiftDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(ShiftDAO)}.{nameof(OpenShift)}", ex);
             return false;
         }
     }
@@ -51,7 +51,7 @@ public class ShiftDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(ShiftDAO)}.{nameof(CloseShift)}", ex);
             return false;
         }
     }

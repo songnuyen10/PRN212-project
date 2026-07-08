@@ -34,7 +34,7 @@ public class OrderDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(OrderDAO)}.{nameof(CreateOrder)}", ex);
             return null;
         }
     }
@@ -73,7 +73,7 @@ public class OrderDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(OrderDAO)}.{nameof(AddItemToOrder)}", ex);
             return false;
         }
     }
@@ -104,7 +104,7 @@ public class OrderDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(OrderDAO)}.{nameof(UpdateOrderItemStatus)}", ex);
             return false;
         }
     }

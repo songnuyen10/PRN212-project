@@ -28,7 +28,7 @@ public class UserDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(UserDAO)}.{nameof(SaveUser)}", ex);
             return false;
         }
     }

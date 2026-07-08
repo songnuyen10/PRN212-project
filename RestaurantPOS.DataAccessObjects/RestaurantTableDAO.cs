@@ -27,7 +27,7 @@ public class RestaurantTableDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(RestaurantTableDAO)}.{nameof(SaveTable)}", ex);
             return false;
         }
     }
@@ -43,7 +43,7 @@ public class RestaurantTableDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(RestaurantTableDAO)}.{nameof(UpdateTable)}", ex);
             return false;
         }
     }
@@ -61,7 +61,7 @@ public class RestaurantTableDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(RestaurantTableDAO)}.{nameof(UpdateTableStatus)}", ex);
             return false;
         }
     }

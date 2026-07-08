@@ -53,7 +53,7 @@ public class PaymentDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(PaymentDAO)}.{nameof(CheckoutOrder)}", ex);
             return false;
         }
     }

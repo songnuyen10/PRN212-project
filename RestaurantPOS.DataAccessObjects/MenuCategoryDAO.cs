@@ -21,7 +21,7 @@ public class MenuCategoryDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(MenuCategoryDAO)}.{nameof(SaveCategory)}", ex);
             return false;
         }
     }
@@ -39,7 +39,7 @@ public class MenuCategoryDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(MenuCategoryDAO)}.{nameof(DeleteCategory)}", ex);
             return false;
         }
     }

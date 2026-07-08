@@ -21,7 +21,7 @@ public class IngredientDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(IngredientDAO)}.{nameof(SaveIngredient)}", ex);
             return false;
         }
     }
@@ -37,7 +37,7 @@ public class IngredientDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(IngredientDAO)}.{nameof(UpdateIngredient)}", ex);
             return false;
         }
     }
@@ -55,7 +55,7 @@ public class IngredientDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(IngredientDAO)}.{nameof(DeleteIngredient)}", ex);
             return false;
         }
     }

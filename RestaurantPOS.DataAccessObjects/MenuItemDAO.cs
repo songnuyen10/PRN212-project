@@ -35,7 +35,7 @@ public class MenuItemDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(MenuItemDAO)}.{nameof(SaveMenuItem)}", ex);
             return false;
         }
     }
@@ -51,7 +51,7 @@ public class MenuItemDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(MenuItemDAO)}.{nameof(UpdateMenuItem)}", ex);
             return false;
         }
     }
@@ -69,7 +69,7 @@ public class MenuItemDAO
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) as needed
+            AppLogger.LogError($"{nameof(MenuItemDAO)}.{nameof(DeleteMenuItem)}", ex);
             return false;
         }
     }
