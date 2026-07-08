@@ -21,9 +21,3 @@ jobs:
       - name: Zip
         run: Compress-Archive -Path publish/* -DestinationPath RestaurantPOS.zip
         shell: pwsh
-
-      - name: Upload to GitHub Releases
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: build-${{ github.run_number }}
-          files: RestaurantPOS.zip
