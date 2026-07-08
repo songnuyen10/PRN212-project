@@ -13,10 +13,16 @@ public partial class PaymentWindow : Window
 
     private void Confirm_Click(object sender, RoutedEventArgs e)
     {
-        var viewModel = (PaymentViewModel)DataContext;
-        if (viewModel.Confirm())
-        {
-            DialogResult = true;
-        }
+        ((PaymentViewModel)DataContext).Confirm();
+    }
+
+    private void Print_Click(object sender, RoutedEventArgs e)
+    {
+        ((PaymentViewModel)DataContext).PrintReceipt();
+    }
+
+    private void Close_Click(object sender, RoutedEventArgs e)
+    {
+        DialogResult = true;
     }
 }

@@ -55,6 +55,7 @@ public class OrderDAO
             .Include(o => o.Table)
             .Include(o => o.OrderItems)
             .ThenInclude(i => i.MenuItem)
+            .Include(o => o.Payment)
             .FirstOrDefault(o => o.OrderId == orderId);
     }
 

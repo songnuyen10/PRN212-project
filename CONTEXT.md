@@ -59,7 +59,7 @@ RestaurantPOS.WpfApp             (Views + MVVM/{RelayCommand,ViewModelBase} + Vi
 - **MaterialDesignThemes** (MaterialDesignInXAML Toolkit) — WPF UI shell, components, theming.
 - **LiveCharts2.WPF** — dashboard revenue charts.
 - **Microsoft.EntityFrameworkCore.SqlServer** — ORM, Code-First.
-- **FastReport.OpenSource** — invoice/report generation and printing.
+- **FastReport.OpenSource** (+ **FastReport.OpenSource.Export.PdfSimple** for PDF export — the core package alone has no PDF/print output) — invoice/report generation and printing.
 - IDE: Visual Studio 2022. DB: SQL Server 2022 Developer + SSMS. Target OS: Windows 10/11 64-bit.
 
 ## Explicitly out of scope (from Report 1 §4.2)
@@ -88,10 +88,10 @@ Online ordering / mobile app, multi-branch management, cross-device real-time ne
 - **Payment + inventory deduction is one DB transaction**: resolved. `PaymentDAO.CheckoutOrder` adds the `Payment`, decrements every `Ingredient.QuantityInStock`, and closes the `Order`/frees the `Table` in a single `SaveChanges()` call — all-or-nothing, no double-deduct window.
 - **Double-booking a table**: resolved. `RestaurantTable` has no concurrency token, so instead `OrderDAO.CreateOrder` does a conditional `ExecuteUpdate` (`WHERE TableId=@id AND Status=Free`) inside a transaction — a losing concurrent request gets 0 rows affected instead of creating a second `Order` on the same table.
 - Centralized error logging: resolved. `RestaurantPOS.DataAccessObjects.AppLogger` (plain text file, no new dependency) is called from every DAO catch block that used to silently swallow exceptions.
-- Open gap as of Report 3, still unresolved: receipt printing (FastReport.OpenSource is referenced in `RestaurantPOS.WpfApp.csproj` but not called from any code yet).
+- Receipt printing: resolved for demo purposes. `RestaurantPOS.WpfApp.Reports.ReceiptBuilder` builds a minimal invoice with FastReport.OpenSource (code-only report, no `.frx` designer file) and exports it via `FastReport.OpenSource.Export.PdfSimple`. `PaymentWindow` gets an "In hóa đơn" button after a successful checkout that opens the generated PDF with the OS default viewer — there's no real receipt printer in this environment, so this is the demoable stand-in (the PDF can still be printed from the viewer).
 - Low-stock threshold: resolved. `Ingredient.LowStockThreshold` + `IsLowStock` are used by `DashboardService.GetLowStockIngredients()`, surfaced in `DashboardViewModel.LowStockIngredients` and shown on `DashboardWindow` — the dashboard's `«include»` low-stock check is wired end to end.
 - Password hashing resolved: PBKDF2 via `Rfc2898DeriveBytes`, no new dependency — see [ADR-0002](docs/adr/0002-password-hashing-pbkdf2.md).
 
 ## Status
 
-Fully implemented: `RestaurantPOS.BusinessObjects`, `RestaurantPOS.DataAccessObjects`, `RestaurantPOS.Repositories`, `RestaurantPOS.Services`, `RestaurantPOS.WpfApp`, `RestaurantPOS.Tests`. This file describes the target design from Report 1–3; it has been checked against the actual code and updated where they diverged (see the resolved trade-offs above). Remaining known gap: receipt printing.
+Fully implemented: `RestaurantPOS.BusinessObjects`, `RestaurantPOS.DataAccessObjects`, `RestaurantPOS.Repositories`, `RestaurantPOS.Services`, `RestaurantPOS.WpfApp`, `RestaurantPOS.Tests`. This file describes the target design from Report 1–3; it has been checked against the actual code and updated where they diverged (see the resolved trade-offs above). All known gaps from Report 3 are now resolved (see above).

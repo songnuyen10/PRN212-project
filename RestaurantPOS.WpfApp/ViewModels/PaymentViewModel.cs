@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using RestaurantPOS.BusinessObjects;
 using RestaurantPOS.Services;
 using RestaurantPOS.WpfApp.MVVM;
+using RestaurantPOS.WpfApp.Reports;
 
 namespace RestaurantPOS.WpfApp.ViewModels;
 
@@ -26,6 +28,15 @@ public class PaymentViewModel : ViewModelBase
         set => SetField(ref _errorMessage, value);
     }
 
+    private bool _isPaid;
+    public bool IsPaid
+    {
+        get => _isPaid;
+        set => SetField(ref _isPaid, value);
+    }
+
+    private string? _receiptPdfPath;
+
     public PaymentViewModel(int orderId)
     {
         OrderId = orderId;
@@ -37,6 +48,24 @@ public class PaymentViewModel : ViewModelBase
         var cashierUserId = SessionContext.CurrentUser!.UserId;
         var success = _paymentService.Checkout(OrderId, cashierUserId, SelectedMethod);
         ErrorMessage = success ? string.Empty : "Thanh toán thất bại — đơn hàng có thể đã bị thay đổi bởi người khác.";
+        if (success)
+        {
+            // Re-fetch: the order now carries its Payment (method, paid-at) needed for the receipt.
+            var paidOrder = _orderService.GetOrderById(OrderId);
+            if (paidOrder != null)
+            {
+                _receiptPdfPath = ReceiptBuilder.BuildPdf(paidOrder);
+            }
+            IsPaid = true;
+        }
         return success;
+    }
+
+    // No real printer to target here — "printing" opens the generated PDF with
+    // the OS default viewer, which can print it.
+    public void PrintReceipt()
+    {
+        if (_receiptPdfPath == null) return;
+        Process.Start(new ProcessStartInfo(_receiptPdfPath) { UseShellExecute = true });
     }
 }
