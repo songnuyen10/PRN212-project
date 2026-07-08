@@ -50,11 +50,19 @@ public class PaymentViewModel : ViewModelBase
         ErrorMessage = success ? string.Empty : "Thanh toán thất bại — đơn hàng có thể đã bị thay đổi bởi người khác.";
         if (success)
         {
-            // Re-fetch: the order now carries its Payment (method, paid-at) needed for the receipt.
-            var paidOrder = _orderService.GetOrderById(OrderId);
-            if (paidOrder != null)
+            // Payment already committed at this point — a receipt failure must not
+            // block the success state or crash the app on the happy path.
+            try
             {
-                _receiptPdfPath = ReceiptBuilder.BuildPdf(paidOrder);
+                var paidOrder = _orderService.GetOrderById(OrderId);
+                if (paidOrder != null)
+                {
+                    _receiptPdfPath = ReceiptBuilder.BuildPdf(paidOrder);
+                }
+            }
+            catch
+            {
+                _receiptPdfPath = null;
             }
             IsPaid = true;
         }

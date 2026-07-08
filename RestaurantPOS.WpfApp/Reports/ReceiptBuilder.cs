@@ -16,7 +16,7 @@ public static class ReceiptBuilder
 
     public static string BuildPdf(Order order)
     {
-        var report = new Report();
+        using var report = new Report();
         var page = new ReportPage { PaperWidth = 80, PaperHeight = 200 };
         report.Pages.Add(page);
 

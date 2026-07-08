@@ -9,10 +9,19 @@ public static class AppLogger
 
     public static void LogError(string context, Exception ex)
     {
-        var line = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [{context}] {ex}{Environment.NewLine}";
-        lock (WriteLock)
+        // A broken logger (disk full, permission denied, ...) must never throw and
+        // replace the caller's own catch-block contract (return false/null).
+        try
         {
-            File.AppendAllText(LogFilePath, line);
+            var line = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [{context}] {ex}{Environment.NewLine}";
+            lock (WriteLock)
+            {
+                File.AppendAllText(LogFilePath, line);
+            }
+        }
+        catch
+        {
+            // Nowhere left to report this — logging is best-effort.
         }
     }
 }
