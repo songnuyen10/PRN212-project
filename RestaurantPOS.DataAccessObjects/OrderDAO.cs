@@ -5,15 +5,20 @@ namespace RestaurantPOS.DataAccessObjects;
 
 public class OrderDAO
 {
-    // Eligibility (table must be Free) is validated by OrderService before this is
-    // called — this is a mechanical insert, not a decision point.
+    // OrderService's Free-table check is only a fast-path hint — two staff can pass it
+    // at nearly the same time. The real guard is the conditional UPDATE below: it only
+    // occupies the table if it is still Free, atomically, so a losing concurrent call
+    // gets 0 rows affected instead of creating a second Order on the same table.
     public static Order? CreateOrder(int tableId, int openedByUserId)
     {
         using var context = new AppDbContext();
+        using var transaction = context.Database.BeginTransaction();
         try
         {
-            var table = context.RestaurantTables.FirstOrDefault(t => t.TableId == tableId);
-            if (table == null) return null;
+            int rowsAffected = context.RestaurantTables
+                .Where(t => t.TableId == tableId && t.Status == TableStatus.Free)
+                .ExecuteUpdate(s => s.SetProperty(t => t.Status, TableStatus.Occupied));
+            if (rowsAffected == 0) return null; // table missing, or lost the race to another order
 
             var order = new Order
             {
@@ -23,8 +28,8 @@ public class OrderDAO
                 Status = OrderStatus.Open
             };
             context.Orders.Add(order);
-            table.Status = TableStatus.Occupied;
             context.SaveChanges();
+            transaction.Commit();
             return order;
         }
         catch (Exception ex)
