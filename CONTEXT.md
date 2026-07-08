@@ -70,7 +70,7 @@ Online ordering / mobile app, multi-branch management, cross-device real-time ne
 
 - Branch naming: `feature/<module-name>`. PR review required from the Team Lead before merge to `main` — no direct pushes.
 - GitHub Actions (`ci.yml`) on every PR to `main`: `dotnet build` (windows-latest), `dotnet test` (xUnit project `RestaurantPOS.Tests`), `dotnet format --verify-no-changes`.
-- On merge to `main`: release workflow runs `dotnet publish`, uploads a `.zip` to GitHub Releases.
+- On merge to `main`: release workflow runs `dotnet publish`, produces a `.zip` artifact. The upload-to-GitHub-Releases step was removed (see `release.yml`, commit `ac350f3`) — no release is published automatically anymore.
 - Risk-driven rule (Report 1 §7): no business logic in View code-behind — this is the concrete rule that keeps the MVVM boundary real, not just aspirational.
 
 ## Key design decisions (from Report 2)
@@ -84,11 +84,13 @@ Online ordering / mobile app, multi-branch management, cross-device real-time ne
 ## Known trade-offs / open risk areas (from Report 3)
 
 - **Polling, not push** (no SignalR/WebSocket) → kitchen screen can lag up to 10s behind a new order. Accepted deliberately for LAN-only, single-restaurant scale — don't "fix" this by adding a push mechanism without discussing it first.
-- **Concurrent cashier edits** on the same order need optimistic concurrency (a rowversion/concurrency token on `Orders`) so a stale update is rejected rather than silently overwritten.
-- **Payment + inventory deduction must be one DB transaction** (all-or-nothing) — creating the `Payment` and decrementing `Ingredient` stock cannot be two separate commits, or concurrent payments can double-deduct.
-- Open gaps as of Report 3: receipt printing, centralized error logging, low-stock threshold definition for the dashboard's `«include»` check.
+- **Concurrent cashier edits** on the same order: resolved. `Orders.RowVersion` is a concurrency token (`AppDbContext.cs`); `PaymentDAO.CheckoutOrder` catches `DbUpdateConcurrencyException` and rejects the stale update rather than overwriting it.
+- **Payment + inventory deduction is one DB transaction**: resolved. `PaymentDAO.CheckoutOrder` adds the `Payment`, decrements every `Ingredient.QuantityInStock`, and closes the `Order`/frees the `Table` in a single `SaveChanges()` call — all-or-nothing, no double-deduct window.
+- **Double-booking a table**: resolved. `RestaurantTable` has no concurrency token, so instead `OrderDAO.CreateOrder` does a conditional `ExecuteUpdate` (`WHERE TableId=@id AND Status=Free`) inside a transaction — a losing concurrent request gets 0 rows affected instead of creating a second `Order` on the same table.
+- Open gaps as of Report 3, still unresolved: receipt printing (FastReport.OpenSource is referenced in `RestaurantPOS.WpfApp.csproj` but not called from any code yet) and centralized error logging (DAOs catch and swallow exceptions with a `// Log the exception (ex) as needed` comment — no `ILogger`/logging framework wired up).
+- Low-stock threshold: partially resolved. `Ingredient.LowStockThreshold` + `IsLowStock` exist and `IngredientService.GetLowStockIngredients()` uses them, but `DashboardService` does not yet surface this — the dashboard's `«include»` low-stock check is still not wired.
 - Password hashing resolved: PBKDF2 via `Rfc2898DeriveBytes`, no new dependency — see [ADR-0002](docs/adr/0002-password-hashing-pbkdf2.md).
 
 ## Status
 
-No source code is committed yet (repo currently holds `docs/` only). This file describes the target design from Report 1–3; verify against actual code as it lands and correct this file where they diverge.
+Fully implemented: `RestaurantPOS.BusinessObjects`, `RestaurantPOS.DataAccessObjects`, `RestaurantPOS.Repositories`, `RestaurantPOS.Services`, `RestaurantPOS.WpfApp`, `RestaurantPOS.Tests`. This file describes the target design from Report 1–3; it has been checked against the actual code and updated where they diverged (see the resolved trade-offs above). Remaining known gaps: receipt printing, centralized error logging, dashboard low-stock integration.
