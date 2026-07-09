@@ -13,11 +13,20 @@ public partial class OrderWindow : Window
 
     private void Checkout_Click(object sender, RoutedEventArgs e)
     {
-        var viewModel = (OrderViewModel)DataContext;
-        var paymentWindow = new PaymentWindow(viewModel.OrderId) { Owner = this };
-        if (paymentWindow.ShowDialog() == true)
+        var button = (UIElement)sender;
+        button.IsEnabled = false;
+        try
         {
-            Close();
+            var viewModel = (OrderViewModel)DataContext;
+            var paymentWindow = new PaymentWindow(viewModel.OrderId) { Owner = this };
+            if (paymentWindow.ShowDialog() == true)
+            {
+                Close();
+            }
+        }
+        finally
+        {
+            button.IsEnabled = true;
         }
     }
 }

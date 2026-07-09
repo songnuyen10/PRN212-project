@@ -15,6 +15,13 @@
             <RadioButton Content="Tiền mặt" IsChecked="{Binding SelectedMethod, ConverterParameter=Cash, Converter={StaticResource EnumToBooleanConverter}}" Margin="0,0,0,4" />
             <RadioButton Content="Chuyển khoản" IsChecked="{Binding SelectedMethod, ConverterParameter=BankTransfer, Converter={StaticResource EnumToBooleanConverter}}" Margin="0,0,0,16" />
 
+            <TextBlock Text="Tiền khách đưa" Margin="0,0,0,4" />
+            <TextBox Text="{Binding AmountTendered, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,4" />
+            <TextBlock Text="{Binding ChangeDue, StringFormat='Tiền thối: {0:N0} đ'}" Margin="0,0,0,16" />
+
+            <TextBlock Text="Chưa mở ca — khoản này sẽ không vào đối soát ca." Foreground="Orange" TextWrapping="Wrap" Margin="0,0,0,8"
+                       Visibility="{Binding HasNoOpenShift, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
             <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8" />
 
             <Button Content="Xác nhận thanh toán" Click="Confirm_Click" Style="{StaticResource MaterialDesignRaisedButton}" />

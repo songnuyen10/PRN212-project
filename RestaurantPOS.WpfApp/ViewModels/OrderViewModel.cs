@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows;
 using RestaurantPOS.BusinessObjects;
 using RestaurantPOS.Services;
@@ -71,7 +73,28 @@ public class OrderViewModel : ViewModelBase
         SendToKitchenCommand = new RelayCommand(_ => SendToKitchen(), _ => DraftLines.Count > 0 && !IsAwaitingPayment);
         MarkAwaitingPaymentCommand = new RelayCommand(_ => MarkAwaitingPayment(), _ => !IsAwaitingPayment);
 
+        DraftLines.CollectionChanged += OnDraftLinesChanged;
+
         Load();
+    }
+
+    // Editing a cart line's quantity in place (OrderWindow's qty TextBox) must
+    // refresh DraftTotal same as adding/removing a line does.
+    private void OnDraftLinesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.OldItems != null)
+        {
+            foreach (CartLine line in e.OldItems) line.PropertyChanged -= OnDraftLinePropertyChanged;
+        }
+        if (e.NewItems != null)
+        {
+            foreach (CartLine line in e.NewItems) line.PropertyChanged += OnDraftLinePropertyChanged;
+        }
+    }
+
+    private void OnDraftLinePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(CartLine.Subtotal)) OnPropertyChanged(nameof(DraftTotal));
     }
 
     private void Load()

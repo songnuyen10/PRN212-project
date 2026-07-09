@@ -12,12 +12,21 @@ public partial class LoginWindow : Window
 
     private void Login_Click(object sender, RoutedEventArgs e)
     {
-        var viewModel = (LoginViewModel)DataContext;
-        var user = viewModel.TryLogin(TxtPassword.Password);
-        if (user == null) return;
+        var button = (UIElement)sender;
+        button.IsEnabled = false;
+        try
+        {
+            var viewModel = (LoginViewModel)DataContext;
+            var user = viewModel.TryLogin(TxtPassword.Password);
+            if (user == null) return;
 
-        SessionContext.CurrentUser = user;
-        new MainWindow().Show();
-        Close();
+            SessionContext.CurrentUser = user;
+            new MainWindow().Show();
+            Close();
+        }
+        finally
+        {
+            button.IsEnabled = true;
+        }
     }
 }

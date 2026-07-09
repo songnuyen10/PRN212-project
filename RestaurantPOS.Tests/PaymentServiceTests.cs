@@ -16,7 +16,7 @@ public class PaymentServiceTests
 
         var result = service.Checkout(orderId: 1, cashierUserId: 1, PaymentMethod.Cash);
 
-        Assert.False(result);
+        Assert.Equal(CheckoutResult.OrderNotOpen, result);
         Assert.False(paymentRepository.CheckoutOrderWasCalled);
     }
 
@@ -32,7 +32,7 @@ public class PaymentServiceTests
 
         var result = service.Checkout(orderId: 1, cashierUserId: 1, PaymentMethod.Cash);
 
-        Assert.True(result);
+        Assert.Equal(CheckoutResult.Success, result);
         Assert.Equal(42, paymentRepository.CheckoutOrderWasCalledWithShiftId);
     }
 
@@ -46,7 +46,20 @@ public class PaymentServiceTests
 
         var result = service.Checkout(orderId: 1, cashierUserId: 1, PaymentMethod.Cash);
 
-        Assert.True(result);
+        Assert.Equal(CheckoutResult.Success, result);
         Assert.Null(paymentRepository.CheckoutOrderWasCalledWithShiftId);
+    }
+
+    [Fact]
+    public void Checkout_ReturnsInsufficientStock_WhenRepositoryReportsIt()
+    {
+        var orderRepository = new FakeOrderRepository();
+        orderRepository.Seed(new Order { OrderId = 1, Status = OrderStatus.Open });
+        var paymentRepository = new FakePaymentRepository { ResultToReturn = CheckoutResult.InsufficientStock };
+        var service = new PaymentService(paymentRepository, orderRepository, new FakeShiftRepository());
+
+        var result = service.Checkout(orderId: 1, cashierUserId: 1, PaymentMethod.Cash);
+
+        Assert.Equal(CheckoutResult.InsufficientStock, result);
     }
 }

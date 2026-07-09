@@ -64,17 +64,12 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="50" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0">
-                                <TextBlock.Text>
-                                    <MultiBinding StringFormat="{}{0} x{1}">
-                                        <Binding Path="MenuItem.ItemName" />
-                                        <Binding Path="Quantity" />
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                            <Button Grid.Column="1" Content="Xóa"
+                            <TextBlock Grid.Column="0" Text="{Binding MenuItem.ItemName}" VerticalAlignment="Center" />
+                            <TextBox Grid.Column="1" Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Margin="4,0" />
+                            <Button Grid.Column="2" Content="Xóa"
                                     Command="{Binding DataContext.RemoveDraftLineCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                     CommandParameter="{Binding}" />
                         </Grid>

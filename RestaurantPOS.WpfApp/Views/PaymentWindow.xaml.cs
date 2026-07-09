@@ -13,7 +13,16 @@ public partial class PaymentWindow : Window
 
     private void Confirm_Click(object sender, RoutedEventArgs e)
     {
-        ((PaymentViewModel)DataContext).Confirm();
+        var button = (UIElement)sender;
+        button.IsEnabled = false;
+        try
+        {
+            ((PaymentViewModel)DataContext).Confirm();
+        }
+        finally
+        {
+            button.IsEnabled = true;
+        }
     }
 
     private void Print_Click(object sender, RoutedEventArgs e)

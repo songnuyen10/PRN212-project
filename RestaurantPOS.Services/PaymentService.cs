@@ -24,11 +24,11 @@ public class PaymentService : IPaymentService
         _shiftRepository = shiftRepository;
     }
 
-    public bool Checkout(int orderId, int cashierUserId, PaymentMethod method)
+    public CheckoutResult Checkout(int orderId, int cashierUserId, PaymentMethod method)
     {
         // Business rule: only an Open order can be checked out.
         var order = _orderRepository.GetOrderById(orderId);
-        if (order == null || order.Status != OrderStatus.Open) return false;
+        if (order == null || order.Status != OrderStatus.Open) return CheckoutResult.OrderNotOpen;
 
         // Stamp the cashier's current open shift on the payment, if any, so it can
         // be reconciled later — a payment is still allowed with no shift open.

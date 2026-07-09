@@ -9,7 +9,7 @@ public class PaymentDAO
     // called. This closes the order, frees the table, and deducts ingredient stock
     // for every item served — all as one SaveChanges call (one DB transaction), so a
     // payment can never be recorded without its inventory deduction (see CONTEXT.md).
-    public static bool CheckoutOrder(int orderId, int cashierUserId, PaymentMethod method, int? shiftId)
+    public static CheckoutResult CheckoutOrder(int orderId, int cashierUserId, PaymentMethod method, int? shiftId)
     {
         using var context = new AppDbContext();
         try
@@ -21,7 +21,20 @@ public class PaymentDAO
                 .ThenInclude(m => m.MenuItemIngredients)
                 .ThenInclude(mi => mi.Ingredient)
                 .FirstOrDefault(o => o.OrderId == orderId);
-            if (order == null) return false;
+            if (order == null) return CheckoutResult.OrderNotOpen;
+
+            // Check every recipe line has enough stock before mutating anything —
+            // a checkout must never leave QuantityInStock negative.
+            foreach (var orderItem in order.OrderItems)
+            {
+                foreach (var recipeLine in orderItem.MenuItem.MenuItemIngredients)
+                {
+                    if (recipeLine.Ingredient.QuantityInStock < recipeLine.QuantityRequired * orderItem.Quantity)
+                    {
+                        return CheckoutResult.InsufficientStock;
+                    }
+                }
+            }
 
             foreach (var orderItem in order.OrderItems)
             {
@@ -44,17 +57,17 @@ public class PaymentDAO
             order.Table.Status = TableStatus.Free;
 
             context.SaveChanges();
-            return true;
+            return CheckoutResult.Success;
         }
         catch (DbUpdateConcurrencyException)
         {
             // Another cashier already modified this order — reject rather than overwrite.
-            return false;
+            return CheckoutResult.Conflict;
         }
         catch (Exception ex)
         {
             AppLogger.LogError($"{nameof(PaymentDAO)}.{nameof(CheckoutOrder)}", ex);
-            return false;
+            return CheckoutResult.Error;
         }
     }
 

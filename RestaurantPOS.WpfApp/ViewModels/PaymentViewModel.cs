@@ -15,12 +15,29 @@ public class PaymentViewModel : ViewModelBase
     public int OrderId { get; }
     public Order? CurrentOrder { get; }
 
+    // No open shift doesn't block checkout (see PaymentService.Checkout), but the
+    // cashier should know this payment won't land in any shift's cash reconciliation.
+    public bool HasNoOpenShift { get; }
+
     private PaymentMethod _selectedMethod = PaymentMethod.Cash;
     public PaymentMethod SelectedMethod
     {
         get => _selectedMethod;
         set => SetField(ref _selectedMethod, value);
     }
+
+    private decimal _amountTendered;
+    public decimal AmountTendered
+    {
+        get => _amountTendered;
+        set
+        {
+            SetField(ref _amountTendered, value);
+            OnPropertyChanged(nameof(ChangeDue));
+        }
+    }
+
+    public decimal ChangeDue => AmountTendered - (CurrentOrder?.Total ?? 0m);
 
     private string _errorMessage = string.Empty;
     public string ErrorMessage
@@ -42,13 +59,29 @@ public class PaymentViewModel : ViewModelBase
     {
         OrderId = orderId;
         CurrentOrder = _orderService.GetOrderById(orderId);
+        HasNoOpenShift = new ShiftService().GetOpenShift(SessionContext.CurrentUser!.UserId) == null;
     }
 
     public bool Confirm()
     {
+        if (SelectedMethod == PaymentMethod.Cash && AmountTendered < (CurrentOrder?.Total ?? 0m))
+        {
+            ErrorMessage = "Tiền khách đưa không đủ.";
+            return false;
+        }
+
         var cashierUserId = SessionContext.CurrentUser!.UserId;
-        var success = _paymentService.Checkout(OrderId, cashierUserId, SelectedMethod);
-        ErrorMessage = success ? string.Empty : "Thanh toán thất bại — đơn hàng có thể đã bị thay đổi bởi người khác.";
+        var result = _paymentService.Checkout(OrderId, cashierUserId, SelectedMethod);
+        ErrorMessage = result switch
+        {
+            CheckoutResult.Success => string.Empty,
+            CheckoutResult.InsufficientStock => "Không đủ nguyên liệu để hoàn tất đơn hàng này.",
+            CheckoutResult.Conflict => "Thanh toán thất bại — đơn hàng đã bị thay đổi bởi người khác.",
+            CheckoutResult.OrderNotOpen => "Đơn hàng không còn ở trạng thái có thể thanh toán.",
+            _ => "Thanh toán thất bại — vui lòng thử lại."
+        };
+
+        var success = result == CheckoutResult.Success;
         if (success)
         {
             // Payment already committed at this point — a receipt failure must not
