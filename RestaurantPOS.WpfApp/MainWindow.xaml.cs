@@ -5,20 +5,36 @@ namespace RestaurantPOS.WpfApp;
 
 public partial class MainWindow : Window
 {
+    private readonly Dictionary<Type, Window> _openWindows = new();
+
     public MainWindow()
     {
         InitializeComponent();
     }
 
-    private void MnuTableMap_Click(object sender, RoutedEventArgs e) => new TableMapWindow().Show();
+    private void ShowSingle<T>() where T : Window, new()
+    {
+        if (_openWindows.TryGetValue(typeof(T), out var existing))
+        {
+            existing.Activate();
+            return;
+        }
 
-    private void MnuShift_Click(object sender, RoutedEventArgs e) => new ShiftWindow().Show();
+        var window = new T();
+        _openWindows[typeof(T)] = window;
+        window.Closed += (_, _) => _openWindows.Remove(typeof(T));
+        window.Show();
+    }
 
-    private void MnuKitchen_Click(object sender, RoutedEventArgs e) => new KitchenWindow().Show();
+    private void MnuTableMap_Click(object sender, RoutedEventArgs e) => ShowSingle<TableMapWindow>();
 
-    private void MnuMenu_Click(object sender, RoutedEventArgs e) => new MenuManagementWindow().Show();
+    private void MnuShift_Click(object sender, RoutedEventArgs e) => ShowSingle<ShiftWindow>();
 
-    private void MnuInventory_Click(object sender, RoutedEventArgs e) => new InventoryWindow().Show();
+    private void MnuKitchen_Click(object sender, RoutedEventArgs e) => ShowSingle<KitchenWindow>();
 
-    private void MnuDashboard_Click(object sender, RoutedEventArgs e) => new DashboardWindow().Show();
+    private void MnuMenu_Click(object sender, RoutedEventArgs e) => ShowSingle<MenuManagementWindow>();
+
+    private void MnuInventory_Click(object sender, RoutedEventArgs e) => ShowSingle<InventoryWindow>();
+
+    private void MnuDashboard_Click(object sender, RoutedEventArgs e) => ShowSingle<DashboardWindow>();
 }

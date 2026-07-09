@@ -47,7 +47,8 @@
             <TextBox Text="{Binding InputPrice, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8" />
             <TextBlock Text="Danh mục" />
             <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding InputCategory}"
-                      DisplayMemberPath="CategoryName" Margin="0,0,0,16" />
+                      DisplayMemberPath="CategoryName" Margin="0,0,0,8" />
+            <CheckBox Content="Đang bán" IsChecked="{Binding InputIsAvailable}" Margin="0,0,0,16" />
 
             <Button Content="Thêm món" Command="{Binding AddMenuItemCommand}" Margin="0,0,0,8" Style="{StaticResource MaterialDesignRaisedButton}" />
             <Button Content="Cập nhật" Command="{Binding UpdateMenuItemCommand}" Margin="0,0,0,8" />

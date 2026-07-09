@@ -83,6 +83,7 @@ public class AppDbContext : DbContext
             entity.Property(i => i.Unit).HasMaxLength(20);
             entity.Property(i => i.QuantityInStock).HasPrecision(10, 3);
             entity.Property(i => i.LowStockThreshold).HasPrecision(10, 3);
+            entity.Property(i => i.RowVersion).IsRowVersion();
         });
 
         // MenuItemIngredient: explicit join entity (not an implicit many-to-many) so
@@ -165,6 +166,12 @@ public class AppDbContext : DbContext
         {
             entity.Property(s => s.OpeningCash).HasColumnType("money");
             entity.Property(s => s.ClosingCash).HasColumnType("money");
+
+            // At most one open shift per user at the DB level — the service-layer
+            // check alone is TOCTOU (see review notes).
+            entity.HasIndex(s => s.UserId)
+                .IsUnique()
+                .HasFilter("[ClosedAt] IS NULL");
 
             entity.HasOne(s => s.User)
                 .WithMany(u => u.Shifts)

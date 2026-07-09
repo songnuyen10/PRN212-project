@@ -36,6 +36,7 @@ public class MenuManagementViewModel : ViewModelBase
                 InputItemName = value.ItemName;
                 InputPrice = value.Price;
                 InputCategory = value.MenuCategory;
+                InputIsAvailable = value.IsAvailable;
             }
         }
     }
@@ -51,6 +52,9 @@ public class MenuManagementViewModel : ViewModelBase
 
     private MenuCategory? _inputCategory;
     public MenuCategory? InputCategory { get => _inputCategory; set => SetField(ref _inputCategory, value); }
+
+    private bool _inputIsAvailable = true;
+    public bool InputIsAvailable { get => _inputIsAvailable; set => SetField(ref _inputIsAvailable, value); }
 
     private string _errorMessage = string.Empty;
     public string ErrorMessage
@@ -126,7 +130,7 @@ public class MenuManagementViewModel : ViewModelBase
             ItemName = InputItemName,
             Price = InputPrice,
             MenuCategoryId = InputCategory!.MenuCategoryId,
-            IsAvailable = true
+            IsAvailable = InputIsAvailable
         }))
         {
             ErrorMessage = "Không thể thêm món.";
@@ -148,6 +152,7 @@ public class MenuManagementViewModel : ViewModelBase
         SelectedMenuItem!.ItemName = InputItemName;
         SelectedMenuItem.Price = InputPrice;
         SelectedMenuItem.MenuCategoryId = InputCategory!.MenuCategoryId;
+        SelectedMenuItem.IsAvailable = InputIsAvailable;
         if (!_menuItemService.UpdateMenuItem(SelectedMenuItem))
         {
             ErrorMessage = "Không thể cập nhật món.";
@@ -180,5 +185,6 @@ public class MenuManagementViewModel : ViewModelBase
         InputItemName = string.Empty;
         InputPrice = 0;
         InputCategory = null;
+        InputIsAvailable = true;
     }
 }
