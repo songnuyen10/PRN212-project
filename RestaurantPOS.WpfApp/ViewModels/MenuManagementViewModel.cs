@@ -52,6 +52,13 @@ public class MenuManagementViewModel : ViewModelBase
     private MenuCategory? _inputCategory;
     public MenuCategory? InputCategory { get => _inputCategory; set => SetField(ref _inputCategory, value); }
 
+    private string _errorMessage = string.Empty;
+    public string ErrorMessage
+    {
+        get => _errorMessage;
+        set => SetField(ref _errorMessage, value);
+    }
+
     public RelayCommand AddCategoryCommand { get; }
     public RelayCommand DeleteCategoryCommand { get; }
     public RelayCommand AddMenuItemCommand { get; }
@@ -80,37 +87,73 @@ public class MenuManagementViewModel : ViewModelBase
 
     private void AddCategory()
     {
-        _categoryService.SaveCategory(new MenuCategory { CategoryName = NewCategoryName });
+        if (!_categoryService.SaveCategory(new MenuCategory { CategoryName = NewCategoryName }))
+        {
+            ErrorMessage = "Không thể thêm danh mục.";
+            return;
+        }
+        ErrorMessage = string.Empty;
         NewCategoryName = string.Empty;
         Load();
     }
 
     private void DeleteCategory()
     {
-        _categoryService.DeleteCategory(SelectedCategory!.MenuCategoryId);
+        var confirm = MessageBox.Show($"Xóa danh mục '{SelectedCategory!.CategoryName}'?", "Xác nhận",
+            MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (confirm != MessageBoxResult.Yes) return;
+
+        if (!_categoryService.DeleteCategory(SelectedCategory!.MenuCategoryId))
+        {
+            ErrorMessage = "Không thể xóa — danh mục đang có món ăn.";
+            return;
+        }
+        ErrorMessage = string.Empty;
         SelectedCategory = null;
         Load();
     }
 
     private void AddMenuItem()
     {
-        _menuItemService.SaveMenuItem(new MenuItem
+        if (InputPrice <= 0)
+        {
+            ErrorMessage = "Giá món phải lớn hơn 0.";
+            return;
+        }
+
+        if (!_menuItemService.SaveMenuItem(new MenuItem
         {
             ItemName = InputItemName,
             Price = InputPrice,
             MenuCategoryId = InputCategory!.MenuCategoryId,
             IsAvailable = true
-        });
+        }))
+        {
+            ErrorMessage = "Không thể thêm món.";
+            return;
+        }
+        ErrorMessage = string.Empty;
         ResetMenuItemInput();
         Load();
     }
 
     private void UpdateMenuItem()
     {
+        if (InputPrice <= 0)
+        {
+            ErrorMessage = "Giá món phải lớn hơn 0.";
+            return;
+        }
+
         SelectedMenuItem!.ItemName = InputItemName;
         SelectedMenuItem.Price = InputPrice;
         SelectedMenuItem.MenuCategoryId = InputCategory!.MenuCategoryId;
-        _menuItemService.UpdateMenuItem(SelectedMenuItem);
+        if (!_menuItemService.UpdateMenuItem(SelectedMenuItem))
+        {
+            ErrorMessage = "Không thể cập nhật món.";
+            return;
+        }
+        ErrorMessage = string.Empty;
         ResetMenuItemInput();
         Load();
     }
@@ -121,7 +164,12 @@ public class MenuManagementViewModel : ViewModelBase
             MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (confirm != MessageBoxResult.Yes) return;
 
-        _menuItemService.DeleteMenuItem(SelectedMenuItem!.MenuItemId);
+        if (!_menuItemService.DeleteMenuItem(SelectedMenuItem!.MenuItemId))
+        {
+            ErrorMessage = "Không thể xóa — món đang được dùng trong đơn hàng.";
+            return;
+        }
+        ErrorMessage = string.Empty;
         ResetMenuItemInput();
         Load();
     }

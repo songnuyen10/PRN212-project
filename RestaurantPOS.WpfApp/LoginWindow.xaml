@@ -26,6 +26,6 @@
 
         <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8" />
 
-        <Button Content="Login" Click="Login_Click" Style="{StaticResource MaterialDesignRaisedButton}" />
+        <Button Content="Login" Click="Login_Click" IsDefault="True" Style="{StaticResource MaterialDesignRaisedButton}" />
     </StackPanel>
 </Window>

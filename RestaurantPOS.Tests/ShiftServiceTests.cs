@@ -7,6 +7,18 @@ namespace RestaurantPOS.Tests;
 public class ShiftServiceTests
 {
     [Fact]
+    public void OpenShift_ReturnsFalse_WhenUserAlreadyHasAnOpenShift()
+    {
+        var shiftRepository = new FakeShiftRepository();
+        shiftRepository.Seed(new Shift { ShiftId = 1, UserId = 7, OpeningCash = 100_000 });
+        var service = new ShiftService(shiftRepository, new FakePaymentRepository());
+
+        var result = service.OpenShift(userId: 7, openingCash: 200_000);
+
+        Assert.False(result);
+    }
+
+    [Fact]
     public void GetReconciliation_ExpectedCash_IsOpeningCashPlusCashPayments()
     {
         var shiftRepository = new FakeShiftRepository();

@@ -18,6 +18,13 @@ public class ShiftViewModel : ViewModelBase
 
     public bool HasOpenShift => OpenShift != null;
 
+    private string _errorMessage = string.Empty;
+    public string ErrorMessage
+    {
+        get => _errorMessage;
+        set => SetField(ref _errorMessage, value);
+    }
+
     private ShiftReconciliation? _reconciliation;
     public ShiftReconciliation? Reconciliation
     {
@@ -63,14 +70,26 @@ public class ShiftViewModel : ViewModelBase
 
     private void OpenNewShift()
     {
-        _shiftService.OpenShift(_userId, OpeningCash);
+        if (!_shiftService.OpenShift(_userId, OpeningCash))
+        {
+            ErrorMessage = "Không thể mở ca — có thể bạn đã có một ca đang mở.";
+            Load();
+            return;
+        }
+        ErrorMessage = string.Empty;
         OpeningCash = 0;
         Load();
     }
 
     private void CloseCurrentShift()
     {
-        _shiftService.CloseShift(OpenShift!.ShiftId, ClosingCash);
+        if (!_shiftService.CloseShift(OpenShift!.ShiftId, ClosingCash))
+        {
+            ErrorMessage = "Không thể đóng ca — vui lòng thử lại.";
+            Load();
+            return;
+        }
+        ErrorMessage = string.Empty;
         ClosingCash = 0;
         Load();
     }

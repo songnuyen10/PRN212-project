@@ -5,7 +5,8 @@
              xmlns:converters="clr-namespace:RestaurantPOS.WpfApp.Converters"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:sysc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
-             StartupUri="LoginWindow.xaml">
+             StartupUri="LoginWindow.xaml"
+        DispatcherUnhandledException="Application_DispatcherUnhandledException">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

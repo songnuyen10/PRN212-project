@@ -36,6 +36,8 @@ public class OrderService : IOrderService
 
     public bool AddItemToOrder(int orderId, int menuItemId, int quantity)
     {
+        if (quantity <= 0) return false;
+
         // Business rule: items can only be added to a still-open order.
         var order = _orderRepository.GetOrderById(orderId);
         if (order == null || order.Status != OrderStatus.Open) return false;

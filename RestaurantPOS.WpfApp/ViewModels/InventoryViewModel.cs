@@ -46,6 +46,13 @@ public class InventoryViewModel : ViewModelBase
     private decimal _inputThreshold;
     public decimal InputThreshold { get => _inputThreshold; set => SetField(ref _inputThreshold, value); }
 
+    private string _errorMessage = string.Empty;
+    public string ErrorMessage
+    {
+        get => _errorMessage;
+        set => SetField(ref _errorMessage, value);
+    }
+
     public RelayCommand AddCommand { get; }
     public RelayCommand UpdateCommand { get; }
     public RelayCommand DeleteCommand { get; }
@@ -66,6 +73,12 @@ public class InventoryViewModel : ViewModelBase
 
     private void Add()
     {
+        if (InputQuantity < 0 || InputThreshold < 0)
+        {
+            ErrorMessage = "Số lượng và ngưỡng cảnh báo không được âm.";
+            return;
+        }
+
         var ingredient = new Ingredient
         {
             IngredientName = InputName,
@@ -73,18 +86,34 @@ public class InventoryViewModel : ViewModelBase
             QuantityInStock = InputQuantity,
             LowStockThreshold = InputThreshold
         };
-        _ingredientService.SaveIngredient(ingredient);
+        if (!_ingredientService.SaveIngredient(ingredient))
+        {
+            ErrorMessage = "Không thể thêm nguyên liệu.";
+            return;
+        }
+        ErrorMessage = string.Empty;
         ResetInput();
         Load();
     }
 
     private void Update()
     {
+        if (InputQuantity < 0 || InputThreshold < 0)
+        {
+            ErrorMessage = "Số lượng và ngưỡng cảnh báo không được âm.";
+            return;
+        }
+
         SelectedIngredient!.IngredientName = InputName;
         SelectedIngredient.Unit = InputUnit;
         SelectedIngredient.QuantityInStock = InputQuantity;
         SelectedIngredient.LowStockThreshold = InputThreshold;
-        _ingredientService.UpdateIngredient(SelectedIngredient);
+        if (!_ingredientService.UpdateIngredient(SelectedIngredient))
+        {
+            ErrorMessage = "Không thể cập nhật nguyên liệu.";
+            return;
+        }
+        ErrorMessage = string.Empty;
         ResetInput();
         Load();
     }
@@ -95,7 +124,12 @@ public class InventoryViewModel : ViewModelBase
             MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (confirm != MessageBoxResult.Yes) return;
 
-        _ingredientService.DeleteIngredient(SelectedIngredient!.IngredientId);
+        if (!_ingredientService.DeleteIngredient(SelectedIngredient!.IngredientId))
+        {
+            ErrorMessage = "Không thể xóa — nguyên liệu đang được dùng trong món ăn.";
+            return;
+        }
+        ErrorMessage = string.Empty;
         ResetInput();
         Load();
     }

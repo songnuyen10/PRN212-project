@@ -13,6 +13,8 @@
     <StackPanel Margin="24">
         <TextBlock Text="Ca làm việc" FontSize="18" FontWeight="Bold" Margin="0,0,0,16" />
 
+        <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8" />
+
         <StackPanel Visibility="{Binding HasOpenShift, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock Text="{Binding OpenShift.OpenedAt, StringFormat='Mở ca lúc: {0:HH:mm dd/MM/yyyy}'}" Margin="0,0,0,8" />
             <TextBlock Text="{Binding Reconciliation.OpeningCash, StringFormat='Tiền đầu ca: {0:N0} đ'}" Margin="0,0,0,4" />

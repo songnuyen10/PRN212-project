@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using RestaurantPOS.BusinessObjects;
+using RestaurantPOS.DataAccessObjects;
 using RestaurantPOS.Services;
 using RestaurantPOS.WpfApp.MVVM;
 using RestaurantPOS.WpfApp.Reports;
@@ -60,9 +61,11 @@ public class PaymentViewModel : ViewModelBase
                     _receiptPdfPath = ReceiptBuilder.BuildPdf(paidOrder);
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 _receiptPdfPath = null;
+                AppLogger.LogError($"{nameof(PaymentViewModel)}.{nameof(Confirm)}", ex);
+                ErrorMessage = "Thanh toán thành công nhưng không tạo được hóa đơn.";
             }
             IsPaid = true;
         }
@@ -74,14 +77,20 @@ public class PaymentViewModel : ViewModelBase
     // temp file gone) must not crash the app, same as a BuildPdf failure above.
     public void PrintReceipt()
     {
-        if (_receiptPdfPath == null) return;
+        if (_receiptPdfPath == null)
+        {
+            ErrorMessage = "Không có hóa đơn để in.";
+            return;
+        }
         try
         {
             Process.Start(new ProcessStartInfo(_receiptPdfPath) { UseShellExecute = true });
+            ErrorMessage = string.Empty;
         }
-        catch
+        catch (Exception ex)
         {
-            // Nothing to fall back to — the receipt PDF still exists on disk.
+            AppLogger.LogError($"{nameof(PaymentViewModel)}.{nameof(PrintReceipt)}", ex);
+            ErrorMessage = "Không thể mở hóa đơn để in.";
         }
     }
 }

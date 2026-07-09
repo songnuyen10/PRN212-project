@@ -32,6 +32,21 @@ public class OrderServiceTests
         Assert.True(orderRepository.AddItemToOrderWasCalled);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void AddItemToOrder_ReturnsFalse_WhenQuantityIsNotPositive(int quantity)
+    {
+        var orderRepository = new FakeOrderRepository();
+        orderRepository.Seed(new Order { OrderId = 1, Status = OrderStatus.Open });
+        var service = new OrderService(orderRepository, new FakeRestaurantTableRepository());
+
+        var result = service.AddItemToOrder(orderId: 1, menuItemId: 1, quantity: quantity);
+
+        Assert.False(result);
+        Assert.False(orderRepository.AddItemToOrderWasCalled);
+    }
+
     [Fact]
     public void CreateOrder_ReturnsOrder_WhenTableIsFree()
     {

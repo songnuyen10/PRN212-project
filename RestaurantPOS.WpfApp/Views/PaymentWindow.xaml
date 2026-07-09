@@ -22,6 +22,7 @@
 
         <StackPanel Visibility="{Binding IsPaid, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock Text="Thanh toán thành công!" FontSize="18" FontWeight="Bold" Margin="0,0,0,16" />
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8" />
             <Button Content="In hóa đơn" Click="Print_Click" Style="{StaticResource MaterialDesignRaisedButton}" Margin="0,0,0,8" />
             <Button Content="Đóng" Click="Close_Click" Style="{StaticResource MaterialDesignRaisedButton}" />
         </StackPanel>

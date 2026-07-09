@@ -51,7 +51,8 @@
 
             <Button Content="Thêm món" Command="{Binding AddMenuItemCommand}" Margin="0,0,0,8" Style="{StaticResource MaterialDesignRaisedButton}" />
             <Button Content="Cập nhật" Command="{Binding UpdateMenuItemCommand}" Margin="0,0,0,8" />
-            <Button Content="Xóa" Command="{Binding DeleteMenuItemCommand}" />
+            <Button Content="Xóa" Command="{Binding DeleteMenuItemCommand}" Margin="0,0,0,8" />
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" />
         </StackPanel>
     </Grid>
 </Window>

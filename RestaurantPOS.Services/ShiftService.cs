@@ -23,7 +23,13 @@ public class ShiftService : IShiftService
 
     public Shift? GetOpenShift(int userId) => _shiftRepository.GetOpenShift(userId);
 
-    public bool OpenShift(int userId, decimal openingCash) => _shiftRepository.OpenShift(userId, openingCash);
+    public bool OpenShift(int userId, decimal openingCash)
+    {
+        // Business rule: a user can't have two open shifts at once.
+        if (_shiftRepository.GetOpenShift(userId) != null) return false;
+
+        return _shiftRepository.OpenShift(userId, openingCash);
+    }
 
     public bool CloseShift(int shiftId, decimal closingCash) => _shiftRepository.CloseShift(shiftId, closingCash);
 

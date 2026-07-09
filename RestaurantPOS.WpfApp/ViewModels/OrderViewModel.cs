@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows;
 using RestaurantPOS.BusinessObjects;
 using RestaurantPOS.Services;
 using RestaurantPOS.WpfApp.MVVM;
@@ -45,6 +46,17 @@ public class OrderViewModel : ViewModelBase
     public decimal SentTotal => CurrentOrder?.Total ?? 0m;
     public decimal DraftTotal => DraftLines.Sum(l => l.Subtotal);
 
+    // Once the table is flagged awaiting payment, the cart is frozen — no more
+    // adding/sending items — until checkout frees the table or payment is reverted.
+    public bool IsAwaitingPayment => CurrentOrder?.Table.Status == TableStatus.AwaitingPayment;
+
+    private string _errorMessage = string.Empty;
+    public string ErrorMessage
+    {
+        get => _errorMessage;
+        set => SetField(ref _errorMessage, value);
+    }
+
     public RelayCommand AddToCartCommand { get; }
     public RelayCommand RemoveDraftLineCommand { get; }
     public RelayCommand SendToKitchenCommand { get; }
@@ -54,10 +66,10 @@ public class OrderViewModel : ViewModelBase
     {
         OrderId = orderId;
 
-        AddToCartCommand = new RelayCommand(_ => AddToCart(), _ => SelectedMenuItem != null && Quantity > 0);
+        AddToCartCommand = new RelayCommand(_ => AddToCart(), _ => SelectedMenuItem != null && Quantity > 0 && !IsAwaitingPayment);
         RemoveDraftLineCommand = new RelayCommand(line => DraftLines.Remove((CartLine)line!));
-        SendToKitchenCommand = new RelayCommand(_ => SendToKitchen(), _ => DraftLines.Count > 0);
-        MarkAwaitingPaymentCommand = new RelayCommand(_ => MarkAwaitingPayment());
+        SendToKitchenCommand = new RelayCommand(_ => SendToKitchen(), _ => DraftLines.Count > 0 && !IsAwaitingPayment);
+        MarkAwaitingPaymentCommand = new RelayCommand(_ => MarkAwaitingPayment(), _ => !IsAwaitingPayment);
 
         Load();
     }
@@ -82,6 +94,7 @@ public class OrderViewModel : ViewModelBase
         }
 
         OnPropertyChanged(nameof(SentTotal));
+        OnPropertyChanged(nameof(IsAwaitingPayment));
     }
 
     private void AddToCart()
@@ -100,11 +113,12 @@ public class OrderViewModel : ViewModelBase
 
     private void SendToKitchen()
     {
-        foreach (var line in DraftLines)
+        var failed = DraftLines.Where(line => !_orderService.AddItemToOrder(OrderId, line.MenuItem.MenuItemId, line.Quantity)).ToList();
+        foreach (var line in DraftLines.Except(failed).ToList())
         {
-            _orderService.AddItemToOrder(OrderId, line.MenuItem.MenuItemId, line.Quantity);
+            DraftLines.Remove(line);
         }
-        DraftLines.Clear();
+        ErrorMessage = failed.Count == 0 ? string.Empty : "Không thể gửi bếp một số món — bàn có thể đã đổi trạng thái.";
         Load();
         OnPropertyChanged(nameof(DraftTotal));
     }
@@ -112,6 +126,11 @@ public class OrderViewModel : ViewModelBase
     private void MarkAwaitingPayment()
     {
         if (CurrentOrder == null) return;
+        var confirm = MessageBox.Show("Chuyển bàn sang trạng thái chờ thanh toán?", "Xác nhận",
+            MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (confirm != MessageBoxResult.Yes) return;
+
         _tableService.MarkAwaitingPayment(CurrentOrder.TableId);
+        Load();
     }
 }

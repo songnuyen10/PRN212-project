@@ -26,6 +26,12 @@ public class LoginViewModel : ViewModelBase
     // PasswordBox.Password cannot be data-bound for security reasons.
     public User? TryLogin(string password)
     {
+        if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(password))
+        {
+            ErrorMessage = "Vui lòng nhập tên đăng nhập và mật khẩu.";
+            return null;
+        }
+
         var user = _authService.Login(Username, password);
         ErrorMessage = user == null ? "Sai tên đăng nhập hoặc mật khẩu." : string.Empty;
         return user;

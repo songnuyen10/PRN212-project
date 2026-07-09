@@ -33,6 +33,7 @@
             <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
                 <TextBlock Text="{Binding SentTotal, StringFormat='Đã gửi bếp: {0:N0} đ'}" FontWeight="Bold" />
                 <TextBlock Text="{Binding DraftTotal, StringFormat='Chưa gửi: {0:N0} đ'}" Margin="0,4,0,8" />
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8" />
                 <Button Content="Gửi bếp" Command="{Binding SendToKitchenCommand}" Margin="0,0,0,8"
                         Style="{StaticResource MaterialDesignRaisedButton}" />
                 <Button Content="Chờ thanh toán" Command="{Binding MarkAwaitingPaymentCommand}" Margin="0,0,0,8" />

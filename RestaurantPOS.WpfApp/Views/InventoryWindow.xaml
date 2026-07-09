@@ -39,7 +39,8 @@
 
             <Button Content="Thêm" Command="{Binding AddCommand}" Margin="0,0,0,8" Style="{StaticResource MaterialDesignRaisedButton}" />
             <Button Content="Cập nhật" Command="{Binding UpdateCommand}" Margin="0,0,0,8" />
-            <Button Content="Xóa" Command="{Binding DeleteCommand}" />
+            <Button Content="Xóa" Command="{Binding DeleteCommand}" Margin="0,0,0,8" />
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" />
         </StackPanel>
     </Grid>
 </Window>
