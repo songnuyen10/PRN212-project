@@ -23,7 +23,7 @@
                 <DataGridTextColumn Header="Tồn kho" Binding="{Binding QuantityInStock}" Width="90" />
                 <DataGridTextColumn Header="Đơn vị" Binding="{Binding Unit}" Width="70" />
                 <DataGridTextColumn Header="Ngưỡng cảnh báo" Binding="{Binding LowStockThreshold}" Width="120" />
-                <DataGridCheckBoxColumn Header="Sắp hết" Binding="{Binding IsLowStock}" Width="70" />
+                <DataGridCheckBoxColumn Header="Sắp hết" Binding="{Binding IsLowStock, Mode=OneWay}" Width="70" />
             </DataGrid.Columns>
         </DataGrid>
 
