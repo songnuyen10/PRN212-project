@@ -14,6 +14,7 @@ public class MainWindowViewModel : ViewModelBase
     // Role-scoped nav — Admin sees everything, Cashier runs the floor, Kitchen only sees the queue.
     public bool CanSeeTableMap { get; }
     public bool CanSeeShift { get; }
+    public bool RequiresShiftGate { get; }
     public bool CanSeeKitchen { get; }
     public bool CanSeeMenu { get; }
     public bool CanSeeInventory { get; }
@@ -41,6 +42,9 @@ public class MainWindowViewModel : ViewModelBase
 
         CanSeeTableMap = user.Role is UserRole.Admin or UserRole.Cashier;
         CanSeeShift = user.Role is UserRole.Admin or UserRole.Cashier;
+        // Cashier can't skip the post-login shift gate (cash payments need an open
+        // shift); Admin sees it too but can dismiss it.
+        RequiresShiftGate = user.Role == UserRole.Cashier;
         CanSeeKitchen = user.Role is UserRole.Admin or UserRole.KitchenStaff;
         CanSeeMenu = user.Role == UserRole.Admin;
         CanSeeInventory = user.Role == UserRole.Admin;

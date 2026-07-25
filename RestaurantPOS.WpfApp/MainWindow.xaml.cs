@@ -7,11 +7,32 @@ namespace RestaurantPOS.WpfApp;
 public partial class MainWindow : Window
 {
     private readonly Dictionary<Type, Window> _openWindows = new();
+    private bool _shiftGateShown;
 
     public MainWindow()
     {
         InitializeComponent();
         Activated += (_, _) => ((MainWindowViewModel)DataContext).RefreshShift();
+        ContentRendered += MainWindow_ContentRendered;
+    }
+
+    // Post-login shift gate. Runs off ContentRendered (not the LoginWindow path)
+    // so a DB error here can never strand the user before MainWindow.Show()
+    // returns — worst case the gate silently doesn't show.
+    private void MainWindow_ContentRendered(object? sender, EventArgs e)
+    {
+        if (_shiftGateShown) return;
+        _shiftGateShown = true;
+
+        var viewModel = (MainWindowViewModel)DataContext;
+        if (!viewModel.CanSeeShift) return;
+
+        viewModel.RefreshShift();
+        if (viewModel.HasOpenShift) return;
+
+        var gate = new ShiftWindow(forceOpen: viewModel.RequiresShiftGate, showSkipButton: !viewModel.RequiresShiftGate) { Owner = this };
+        gate.ShowDialog();
+        viewModel.RefreshShift();
     }
 
     private void ShowSingle<T>() where T : Window, new()

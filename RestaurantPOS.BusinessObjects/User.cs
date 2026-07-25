@@ -8,6 +8,8 @@ public class User
     public byte[] PasswordSalt { get; set; } = null!;
     public string FullName { get; set; } = null!;
     public UserRole Role { get; set; }
+    public TimeSpan? ScheduledStartTime { get; set; }
+    public TimeSpan? ScheduledEndTime { get; set; }
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();

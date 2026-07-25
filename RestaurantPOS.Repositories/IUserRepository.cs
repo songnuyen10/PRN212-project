@@ -7,4 +7,5 @@ public interface IUserRepository
     User? GetUserByUsername(string username);
     List<User> GetUsers();
     bool SaveUser(User user);
+    bool UpdateScheduledHours(int userId, TimeSpan? start, TimeSpan? end);
 }

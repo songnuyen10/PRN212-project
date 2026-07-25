@@ -18,4 +18,13 @@ public class FakeUserRepository : IUserRepository
         _users.Add(user);
         return true;
     }
+
+    public bool UpdateScheduledHours(int userId, TimeSpan? start, TimeSpan? end)
+    {
+        var user = _users.FirstOrDefault(u => u.UserId == userId);
+        if (user == null) return false;
+        user.ScheduledStartTime = start;
+        user.ScheduledEndTime = end;
+        return true;
+    }
 }

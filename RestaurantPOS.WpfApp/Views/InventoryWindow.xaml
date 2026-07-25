@@ -5,7 +5,7 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        Title="Kho nguyên liệu" Height="520" Width="720"
+        Title="Kho nguyên liệu" Height="600" Width="880"
         WindowStartupLocation="CenterScreen">
     <Window.DataContext>
         <vm:InventoryViewModel />
@@ -13,19 +13,40 @@
     <Grid Margin="16">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="240" />
+            <ColumnDefinition Width="260" />
         </Grid.ColumnDefinitions>
 
-        <DataGrid Grid.Column="0" ItemsSource="{Binding Ingredients}" SelectedItem="{Binding SelectedIngredient}"
-                  AutoGenerateColumns="False" IsReadOnly="True" Margin="0,0,16,0">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Tên" Binding="{Binding IngredientName}" Width="*" />
-                <DataGridTextColumn Header="Tồn kho" Binding="{Binding QuantityInStock}" Width="90" />
-                <DataGridTextColumn Header="Đơn vị" Binding="{Binding Unit}" Width="70" />
-                <DataGridTextColumn Header="Ngưỡng cảnh báo" Binding="{Binding LowStockThreshold}" Width="120" />
-                <DataGridCheckBoxColumn Header="Sắp hết" Binding="{Binding IsLowStock, Mode=OneWay}" Width="70" />
-            </DataGrid.Columns>
-        </DataGrid>
+        <Grid Grid.Column="0" Margin="0,0,16,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2*" />
+                <RowDefinition Height="8" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <DataGrid Grid.Row="0" ItemsSource="{Binding Ingredients}" SelectedItem="{Binding SelectedIngredient}"
+                      AutoGenerateColumns="False" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Tên" Binding="{Binding IngredientName}" Width="*" />
+                    <DataGridTextColumn Header="Tồn kho" Binding="{Binding QuantityInStock}" Width="90" />
+                    <DataGridTextColumn Header="Đơn vị" Binding="{Binding Unit}" Width="70" />
+                    <DataGridTextColumn Header="Ngưỡng cảnh báo" Binding="{Binding LowStockThreshold}" Width="120" />
+                    <DataGridCheckBoxColumn Header="Sắp hết" Binding="{Binding IsLowStock, Mode=OneWay}" Width="70" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <StackPanel Grid.Row="1" Orientation="Vertical" VerticalAlignment="Center">
+                <TextBlock Text="Lịch sử nhập kho" FontWeight="Bold" />
+            </StackPanel>
+
+            <DataGrid Grid.Row="2" ItemsSource="{Binding StockEntries}" AutoGenerateColumns="False" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Thời gian" Binding="{Binding ReceivedAt}" Width="140" />
+                    <DataGridTextColumn Header="Số lượng" Binding="{Binding QuantityAdded}" Width="90" />
+                    <DataGridTextColumn Header="Người nhập" Binding="{Binding User.FullName}" Width="140" />
+                    <DataGridTextColumn Header="Ghi chú" Binding="{Binding Note}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
 
         <StackPanel Grid.Column="1">
             <TextBlock Text="Tên nguyên liệu" />
@@ -33,13 +54,22 @@
             <TextBlock Text="Đơn vị" />
             <TextBox Text="{Binding InputUnit, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8" />
             <TextBlock Text="Số lượng tồn kho" />
-            <TextBox Text="{Binding InputQuantity, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8" />
+            <TextBox Text="{Binding InputQuantity, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Margin="0,0,0,8" />
             <TextBlock Text="Ngưỡng cảnh báo" />
-            <TextBox Text="{Binding InputThreshold, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,16" />
+            <TextBox Text="{Binding InputThreshold, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Margin="0,0,0,16" />
 
             <Button Content="Thêm" Command="{Binding AddCommand}" Margin="0,0,0,8" Style="{StaticResource MaterialDesignRaisedButton}" />
             <Button Content="Cập nhật" Command="{Binding UpdateCommand}" Margin="0,0,0,8" />
-            <Button Content="Xóa" Command="{Binding DeleteCommand}" Margin="0,0,0,8" />
+            <Button Content="Xóa" Command="{Binding DeleteCommand}" Margin="0,0,0,16" />
+
+            <Separator Margin="0,0,0,8" />
+            <TextBlock Text="Nhập kho" FontWeight="Bold" Margin="0,0,0,8" />
+            <TextBlock Text="Số lượng nhập thêm" />
+            <TextBox Text="{Binding ReceiveQuantityInput, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Margin="0,0,0,8" />
+            <TextBlock Text="Ghi chú" />
+            <TextBox Text="{Binding ReceiveNoteInput, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8" />
+            <Button Content="Nhập kho" Command="{Binding ReceiveStockCommand}" Margin="0,0,0,16" Style="{StaticResource MaterialDesignRaisedButton}" />
+
             <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" />
         </StackPanel>
     </Grid>
