@@ -11,7 +11,9 @@ public class OrderRepository : IOrderRepository
 
     public Order? GetOrderById(int orderId) => OrderDAO.GetOrderById(orderId);
 
-    public bool AddItemToOrder(int orderId, int menuItemId, int quantity) => OrderDAO.AddItemToOrder(orderId, menuItemId, quantity);
+    public AddItemsResult AddItemsToOrder(int orderId, IReadOnlyList<(int MenuItemId, int Quantity)> lines) => OrderDAO.AddItemsToOrder(orderId, lines);
+
+    public bool CancelOrder(int orderId, int cancelledByUserId, string reason) => OrderDAO.CancelOrder(orderId, cancelledByUserId, reason);
 
     public List<OrderItem> GetKitchenQueue() => OrderDAO.GetKitchenQueue();
 

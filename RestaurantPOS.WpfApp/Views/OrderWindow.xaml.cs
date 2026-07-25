@@ -29,4 +29,22 @@ public partial class OrderWindow : Window
             button.IsEnabled = true;
         }
     }
+
+    private void Cancel_Click(object sender, RoutedEventArgs e)
+    {
+        var button = (UIElement)sender;
+        button.IsEnabled = false;
+        try
+        {
+            var viewModel = (OrderViewModel)DataContext;
+            if (viewModel.CancelOrder())
+            {
+                Close();
+            }
+        }
+        finally
+        {
+            button.IsEnabled = true;
+        }
+    }
 }

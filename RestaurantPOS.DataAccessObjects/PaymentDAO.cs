@@ -21,7 +21,7 @@ public class PaymentDAO
                 .ThenInclude(m => m.MenuItemIngredients)
                 .ThenInclude(mi => mi.Ingredient)
                 .FirstOrDefault(o => o.OrderId == orderId);
-            if (order == null) return CheckoutResult.OrderNotOpen;
+            if (order == null || order.Status != OrderStatus.Open) return CheckoutResult.OrderNotOpen;
 
             // Check every recipe line has enough stock before mutating anything —
             // a checkout must never leave QuantityInStock negative.

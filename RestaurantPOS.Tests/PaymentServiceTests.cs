@@ -37,7 +37,7 @@ public class PaymentServiceTests
     }
 
     [Fact]
-    public void Checkout_AllowsPayment_WhenCashierHasNoOpenShift()
+    public void Checkout_RejectsCash_WhenCashierHasNoOpenShift()
     {
         var orderRepository = new FakeOrderRepository();
         orderRepository.Seed(new Order { OrderId = 1, Status = OrderStatus.Open });
@@ -45,6 +45,20 @@ public class PaymentServiceTests
         var service = new PaymentService(paymentRepository, orderRepository, new FakeShiftRepository());
 
         var result = service.Checkout(orderId: 1, cashierUserId: 1, PaymentMethod.Cash);
+
+        Assert.Equal(CheckoutResult.NoOpenShift, result);
+        Assert.False(paymentRepository.CheckoutOrderWasCalled);
+    }
+
+    [Fact]
+    public void Checkout_AllowsBankTransfer_WhenCashierHasNoOpenShift()
+    {
+        var orderRepository = new FakeOrderRepository();
+        orderRepository.Seed(new Order { OrderId = 1, Status = OrderStatus.Open });
+        var paymentRepository = new FakePaymentRepository();
+        var service = new PaymentService(paymentRepository, orderRepository, new FakeShiftRepository());
+
+        var result = service.Checkout(orderId: 1, cashierUserId: 1, PaymentMethod.BankTransfer);
 
         Assert.Equal(CheckoutResult.Success, result);
         Assert.Null(paymentRepository.CheckoutOrderWasCalledWithShiftId);
@@ -55,8 +69,10 @@ public class PaymentServiceTests
     {
         var orderRepository = new FakeOrderRepository();
         orderRepository.Seed(new Order { OrderId = 1, Status = OrderStatus.Open });
+        var shiftRepository = new FakeShiftRepository();
+        shiftRepository.Seed(new Shift { ShiftId = 42, UserId = 1, OpeningCash = 500_000 });
         var paymentRepository = new FakePaymentRepository { ResultToReturn = CheckoutResult.InsufficientStock };
-        var service = new PaymentService(paymentRepository, orderRepository, new FakeShiftRepository());
+        var service = new PaymentService(paymentRepository, orderRepository, shiftRepository);
 
         var result = service.Checkout(orderId: 1, cashierUserId: 1, PaymentMethod.Cash);
 

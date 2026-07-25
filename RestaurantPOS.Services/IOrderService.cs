@@ -7,7 +7,8 @@ public interface IOrderService
     Order? CreateOrder(int tableId, int openedByUserId);
     Order? GetOpenOrderByTable(int tableId);
     Order? GetOrderById(int orderId);
-    bool AddItemToOrder(int orderId, int menuItemId, int quantity);
+    AddItemsResult AddItemsToOrder(int orderId, IReadOnlyList<(int MenuItemId, int Quantity)> lines);
+    bool CancelOrder(int orderId, int cancelledByUserId, string reason);
     List<OrderItem> GetKitchenQueue();
     bool UpdateOrderItemStatus(int orderItemId, OrderItemStatus status);
 }

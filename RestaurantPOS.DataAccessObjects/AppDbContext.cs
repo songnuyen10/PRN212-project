@@ -107,6 +107,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Order>(entity =>
         {
             entity.Property(o => o.RowVersion).IsRowVersion();
+            entity.Property(o => o.CancelReason).HasMaxLength(200);
 
             entity.HasOne(o => o.Table)
                 .WithMany(t => t.Orders)

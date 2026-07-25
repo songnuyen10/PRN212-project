@@ -18,6 +18,11 @@ public class Order
     public int OpenedByUserId { get; set; }
     public virtual User OpenedByUser { get; set; } = null!;
 
+    // Audit trail for a cancelled order — no nav property, nothing needs to query
+    // "orders I cancelled" today.
+    public int? CancelledByUserId { get; set; }
+    public string? CancelReason { get; set; }
+
     public virtual Payment? Payment { get; set; }
 
     private readonly List<OrderItem> _orderItems = new();

@@ -59,6 +59,13 @@ public class OrderViewModel : ViewModelBase
         set => SetField(ref _errorMessage, value);
     }
 
+    private string _cancelReason = string.Empty;
+    public string CancelReason
+    {
+        get => _cancelReason;
+        set => SetField(ref _cancelReason, value);
+    }
+
     public RelayCommand AddToCartCommand { get; }
     public RelayCommand RemoveDraftLineCommand { get; }
     public RelayCommand SendToKitchenCommand { get; }
@@ -136,12 +143,20 @@ public class OrderViewModel : ViewModelBase
 
     private void SendToKitchen()
     {
-        var failed = DraftLines.Where(line => !_orderService.AddItemToOrder(OrderId, line.MenuItem.MenuItemId, line.Quantity)).ToList();
-        foreach (var line in DraftLines.Except(failed).ToList())
+        var lines = DraftLines.Select(l => (l.MenuItem.MenuItemId, l.Quantity)).ToList();
+        var result = _orderService.AddItemsToOrder(OrderId, lines);
+
+        ErrorMessage = result switch
         {
-            DraftLines.Remove(line);
+            AddItemsResult.Success => string.Empty,
+            AddItemsResult.InsufficientStock => "Không đủ nguyên liệu cho các món này.",
+            _ => "Không thể gửi bếp — bàn có thể đã đổi trạng thái."
+        };
+
+        if (result == AddItemsResult.Success)
+        {
+            DraftLines.Clear();
         }
-        ErrorMessage = failed.Count == 0 ? string.Empty : "Không thể gửi bếp một số món — bàn có thể đã đổi trạng thái.";
         Load();
         OnPropertyChanged(nameof(DraftTotal));
     }
@@ -155,5 +170,29 @@ public class OrderViewModel : ViewModelBase
 
         _tableService.MarkAwaitingPayment(CurrentOrder.TableId);
         Load();
+    }
+
+    // Frees a mis-opened/no-longer-wanted table. Returns true if the order was
+    // cancelled — the caller (code-behind) closes the window on true.
+    public bool CancelOrder()
+    {
+        if (string.IsNullOrWhiteSpace(CancelReason))
+        {
+            MessageBox.Show("Vui lòng nhập lý do hủy đơn.", "Thiếu thông tin",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return false;
+        }
+
+        var confirm = MessageBox.Show("Hủy đơn hàng này? Bàn sẽ được giải phóng.", "Xác nhận",
+            MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (confirm != MessageBoxResult.Yes) return false;
+
+        var cancelledByUserId = SessionContext.CurrentUser!.UserId;
+        if (!_orderService.CancelOrder(OrderId, cancelledByUserId, CancelReason))
+        {
+            ErrorMessage = "Không thể hủy đơn — vui lòng thử lại.";
+            return false;
+        }
+        return true;
     }
 }

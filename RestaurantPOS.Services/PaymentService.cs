@@ -30,9 +30,12 @@ public class PaymentService : IPaymentService
         var order = _orderRepository.GetOrderById(orderId);
         if (order == null || order.Status != OrderStatus.Open) return CheckoutResult.OrderNotOpen;
 
-        // Stamp the cashier's current open shift on the payment, if any, so it can
-        // be reconciled later — a payment is still allowed with no shift open.
+        // Stamp the cashier's current open shift on the payment, so it can be
+        // reconciled later. Cash needs a shift open — it's the only method that
+        // touches the physical cash drawer being reconciled. Bank transfer doesn't
+        // touch the drawer, so it's still allowed with no shift open.
         var shiftId = _shiftRepository.GetOpenShift(cashierUserId)?.ShiftId;
+        if (method == PaymentMethod.Cash && shiftId == null) return CheckoutResult.NoOpenShift;
 
         return _paymentRepository.CheckoutOrder(orderId, cashierUserId, method, shiftId);
     }
