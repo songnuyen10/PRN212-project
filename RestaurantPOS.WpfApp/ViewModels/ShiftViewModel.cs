@@ -107,8 +107,18 @@ public class ShiftViewModel : ViewModelBase
         OnPropertyChanged(nameof(ShowNoShiftPanel));
     }
 
-    private void UpdateElapsedText() =>
-        ElapsedText = OpenShift == null ? string.Empty : (DateTime.Now - OpenShift.OpenedAt).ToString(@"hh\:mm\:ss");
+    // TimeSpan's "hh" format specifier is hours-within-day (0-23), not total
+    // hours — a shift left open past 24h would silently lose its day count.
+    private void UpdateElapsedText()
+    {
+        if (OpenShift == null)
+        {
+            ElapsedText = string.Empty;
+            return;
+        }
+        var elapsed = DateTime.Now - OpenShift.OpenedAt;
+        ElapsedText = $"{(int)elapsed.TotalHours:D2}:{elapsed:mm\\:ss}";
+    }
 
     public void StopTimer() => _timer.Stop();
 

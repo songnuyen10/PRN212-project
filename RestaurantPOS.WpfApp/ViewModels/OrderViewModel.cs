@@ -183,8 +183,10 @@ public class OrderViewModel : ViewModelBase
             return false;
         }
 
-        var confirm = MessageBox.Show("Hủy đơn hàng này? Bàn sẽ được giải phóng.", "Xác nhận",
-            MessageBoxButton.YesNo, MessageBoxImage.Question);
+        var confirmMessage = SentItems.Count > 0
+            ? $"Đơn có {SentItems.Count} món đã gửi bếp (có thể đang chế biến). Hủy đơn hàng này? Bàn sẽ được giải phóng."
+            : "Hủy đơn hàng này? Bàn sẽ được giải phóng.";
+        var confirm = MessageBox.Show(confirmMessage, "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (confirm != MessageBoxResult.Yes) return false;
 
         var cancelledByUserId = SessionContext.CurrentUser!.UserId;

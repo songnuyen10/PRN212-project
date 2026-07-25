@@ -23,25 +23,33 @@ public class PaymentDAO
                 .FirstOrDefault(o => o.OrderId == orderId);
             if (order == null || order.Status != OrderStatus.Open) return CheckoutResult.OrderNotOpen;
 
-            // Check every recipe line has enough stock before mutating anything —
-            // a checkout must never leave QuantityInStock negative.
+            // Accumulate required quantity per ingredient across all order items before
+            // checking — two items sharing an ingredient must not each pass an
+            // independent check against the same not-yet-deducted stock figure (that
+            // would let the deduction below drive QuantityInStock negative).
+            var ingredientsById = order.OrderItems
+                .SelectMany(oi => oi.MenuItem.MenuItemIngredients)
+                .Select(mi => mi.Ingredient)
+                .DistinctBy(i => i.IngredientId)
+                .ToDictionary(i => i.IngredientId);
+
+            var required = new Dictionary<int, decimal>();
             foreach (var orderItem in order.OrderItems)
             {
                 foreach (var recipeLine in orderItem.MenuItem.MenuItemIngredients)
                 {
-                    if (recipeLine.Ingredient.QuantityInStock < recipeLine.QuantityRequired * orderItem.Quantity)
-                    {
-                        return CheckoutResult.InsufficientStock;
-                    }
+                    required[recipeLine.IngredientId] = required.GetValueOrDefault(recipeLine.IngredientId) + recipeLine.QuantityRequired * orderItem.Quantity;
                 }
             }
 
-            foreach (var orderItem in order.OrderItems)
+            foreach (var (ingredientId, quantityNeeded) in required)
             {
-                foreach (var recipeLine in orderItem.MenuItem.MenuItemIngredients)
-                {
-                    recipeLine.Ingredient.QuantityInStock -= recipeLine.QuantityRequired * orderItem.Quantity;
-                }
+                if (ingredientsById[ingredientId].QuantityInStock < quantityNeeded) return CheckoutResult.InsufficientStock;
+            }
+
+            foreach (var (ingredientId, quantityNeeded) in required)
+            {
+                ingredientsById[ingredientId].QuantityInStock -= quantityNeeded;
             }
 
             context.Payments.Add(new Payment
