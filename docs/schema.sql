@@ -547,3 +547,119 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260725072520_AddOrderCancellation'
+)
+BEGIN
+    ALTER TABLE [Orders] ADD [CancelReason] nvarchar(200) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260725072520_AddOrderCancellation'
+)
+BEGIN
+    ALTER TABLE [Orders] ADD [CancelledByUserId] int NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260725072520_AddOrderCancellation'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260725072520_AddOrderCancellation', N'8.0.11');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260725094626_AddRosterAndStockReceiving'
+)
+BEGIN
+    ALTER TABLE [Users] ADD [ScheduledEndTime] time NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260725094626_AddRosterAndStockReceiving'
+)
+BEGIN
+    ALTER TABLE [Users] ADD [ScheduledStartTime] time NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260725094626_AddRosterAndStockReceiving'
+)
+BEGIN
+    CREATE TABLE [IngredientStockEntries] (
+        [IngredientStockEntryId] int NOT NULL IDENTITY,
+        [IngredientId] int NOT NULL,
+        [UserId] int NOT NULL,
+        [QuantityAdded] decimal(10,3) NOT NULL,
+        [ReceivedAt] datetime2 NOT NULL,
+        [Note] nvarchar(200) NULL,
+        CONSTRAINT [PK_IngredientStockEntries] PRIMARY KEY ([IngredientStockEntryId]),
+        CONSTRAINT [FK_IngredientStockEntries_Ingredients_IngredientId] FOREIGN KEY ([IngredientId]) REFERENCES [Ingredients] ([IngredientId]) ON DELETE CASCADE,
+        CONSTRAINT [FK_IngredientStockEntries_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [Users] ([UserId]) ON DELETE NO ACTION
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260725094626_AddRosterAndStockReceiving'
+)
+BEGIN
+    EXEC(N'UPDATE [Users] SET [ScheduledEndTime] = NULL, [ScheduledStartTime] = NULL
+    WHERE [UserId] = 1;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260725094626_AddRosterAndStockReceiving'
+)
+BEGIN
+    CREATE INDEX [IX_IngredientStockEntries_IngredientId] ON [IngredientStockEntries] ([IngredientId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260725094626_AddRosterAndStockReceiving'
+)
+BEGIN
+    CREATE INDEX [IX_IngredientStockEntries_UserId] ON [IngredientStockEntries] ([UserId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260725094626_AddRosterAndStockReceiving'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260725094626_AddRosterAndStockReceiving', N'8.0.11');
+END;
+GO
+
+COMMIT;
+GO
+
