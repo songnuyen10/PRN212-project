@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RestaurantPOS.DataAccessObjects;
 
@@ -11,9 +12,11 @@ using RestaurantPOS.DataAccessObjects;
 namespace RestaurantPOS.DataAccessObjects.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260725072520_AddOrderCancellation")]
+    partial class AddOrderCancellation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,40 +102,6 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                             QuantityInStock = 5m,
                             Unit = "kg"
                         });
-                });
-
-            modelBuilder.Entity("RestaurantPOS.BusinessObjects.IngredientStockEntry", b =>
-                {
-                    b.Property<int>("IngredientStockEntryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IngredientStockEntryId"));
-
-                    b.Property<int>("IngredientId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<decimal>("QuantityAdded")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
-
-                    b.Property<DateTime>("ReceivedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("IngredientStockEntryId");
-
-                    b.HasIndex("IngredientId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("IngredientStockEntries");
                 });
 
             modelBuilder.Entity("RestaurantPOS.BusinessObjects.MenuCategory", b =>
@@ -520,12 +489,6 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
-                    b.Property<TimeSpan?>("ScheduledEndTime")
-                        .HasColumnType("time");
-
-                    b.Property<TimeSpan?>("ScheduledStartTime")
-                        .HasColumnType("time");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -548,25 +511,6 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                             Role = 0,
                             Username = "admin"
                         });
-                });
-
-            modelBuilder.Entity("RestaurantPOS.BusinessObjects.IngredientStockEntry", b =>
-                {
-                    b.HasOne("RestaurantPOS.BusinessObjects.Ingredient", "Ingredient")
-                        .WithMany()
-                        .HasForeignKey("IngredientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RestaurantPOS.BusinessObjects.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Ingredient");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RestaurantPOS.BusinessObjects.MenuItem", b =>

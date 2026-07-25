@@ -26,6 +26,18 @@
                       Visibility="{Binding CanSeeDashboard, Converter={StaticResource BooleanToVisibilityConverter}}" />
         </Menu>
 
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock Text="{Binding WelcomeText}" />
+            </StatusBarItem>
+            <StatusBarItem Visibility="{Binding CanSeeShift, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="{Binding ShiftStatusText}" />
+            </StatusBarItem>
+            <StatusBarItem DockPanel.Dock="Right">
+                <Button Content="Đăng xuất" Click="Logout_Click" />
+            </StatusBarItem>
+        </StatusBar>
+
         <Grid>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock Text="{Binding WelcomeText}" FontSize="20" HorizontalAlignment="Center" Margin="0,0,0,8" />

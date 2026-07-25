@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using RestaurantPOS.BusinessObjects;
 using RestaurantPOS.Services;
@@ -30,6 +31,11 @@ public class InventoryViewModel : ViewModelBase
                 InputUnit = value.Unit;
                 InputQuantity = value.QuantityInStock;
                 InputThreshold = value.LowStockThreshold;
+                LoadStockEntries(value.IngredientId);
+            }
+            else
+            {
+                StockEntries = new ObservableCollection<IngredientStockEntry>();
             }
         }
     }
@@ -53,15 +59,30 @@ public class InventoryViewModel : ViewModelBase
         set => SetField(ref _errorMessage, value);
     }
 
+    private decimal _receiveQuantityInput;
+    public decimal ReceiveQuantityInput { get => _receiveQuantityInput; set => SetField(ref _receiveQuantityInput, value); }
+
+    private string _receiveNoteInput = string.Empty;
+    public string ReceiveNoteInput { get => _receiveNoteInput; set => SetField(ref _receiveNoteInput, value); }
+
+    private ObservableCollection<IngredientStockEntry> _stockEntries = new();
+    public ObservableCollection<IngredientStockEntry> StockEntries
+    {
+        get => _stockEntries;
+        set => SetField(ref _stockEntries, value);
+    }
+
     public RelayCommand AddCommand { get; }
     public RelayCommand UpdateCommand { get; }
     public RelayCommand DeleteCommand { get; }
+    public RelayCommand ReceiveStockCommand { get; }
 
     public InventoryViewModel()
     {
         AddCommand = new RelayCommand(_ => Add(), _ => !string.IsNullOrWhiteSpace(InputName) && SelectedIngredient == null);
         UpdateCommand = new RelayCommand(_ => Update(), _ => SelectedIngredient != null);
         DeleteCommand = new RelayCommand(_ => Delete(), _ => SelectedIngredient != null);
+        ReceiveStockCommand = new RelayCommand(_ => ReceiveStock(), _ => SelectedIngredient != null && ReceiveQuantityInput > 0);
 
         Load();
     }
@@ -88,7 +109,7 @@ public class InventoryViewModel : ViewModelBase
         };
         if (!_ingredientService.SaveIngredient(ingredient))
         {
-            ErrorMessage = "Không thể thêm nguyên liệu.";
+            ErrorMessage = "Không thể thêm nguyên liệu — tên có thể đã tồn tại.";
             return;
         }
         ErrorMessage = string.Empty;
@@ -98,6 +119,11 @@ public class InventoryViewModel : ViewModelBase
 
     private void Update()
     {
+        if (string.IsNullOrWhiteSpace(InputName))
+        {
+            ErrorMessage = "Tên nguyên liệu không được để trống.";
+            return;
+        }
         if (InputQuantity < 0 || InputThreshold < 0)
         {
             ErrorMessage = "Số lượng và ngưỡng cảnh báo không được âm.";
@@ -110,12 +136,32 @@ public class InventoryViewModel : ViewModelBase
         SelectedIngredient.LowStockThreshold = InputThreshold;
         if (!_ingredientService.UpdateIngredient(SelectedIngredient))
         {
-            ErrorMessage = "Không thể cập nhật nguyên liệu.";
+            ErrorMessage = "Không thể cập nhật nguyên liệu — tên có thể đã tồn tại.";
             return;
         }
         ErrorMessage = string.Empty;
         ResetInput();
         Load();
+    }
+
+    private void LoadStockEntries(int ingredientId)
+    {
+        StockEntries = new ObservableCollection<IngredientStockEntry>(_ingredientService.GetStockEntriesByIngredient(ingredientId));
+    }
+
+    private void ReceiveStock()
+    {
+        if (!_ingredientService.ReceiveStock(SelectedIngredient!.IngredientId, ReceiveQuantityInput, SessionContext.CurrentUser!.UserId, string.IsNullOrWhiteSpace(ReceiveNoteInput) ? null : ReceiveNoteInput))
+        {
+            ErrorMessage = "Không thể nhập kho.";
+            return;
+        }
+        ErrorMessage = string.Empty;
+        var ingredientId = SelectedIngredient.IngredientId;
+        ReceiveQuantityInput = 0;
+        ReceiveNoteInput = string.Empty;
+        Load();
+        SelectedIngredient = Ingredients.FirstOrDefault(i => i.IngredientId == ingredientId);
     }
 
     private void Delete()

@@ -16,4 +16,8 @@ public class FakeIngredientRepository : IIngredientRepository
     public bool UpdateIngredient(Ingredient ingredient) => true;
 
     public bool DeleteIngredient(int ingredientId) => true;
+
+    public bool ReceiveStock(int ingredientId, decimal quantity, int userId, string? note) => true;
+
+    public List<IngredientStockEntry> GetStockEntriesByIngredient(int ingredientId) => new();
 }

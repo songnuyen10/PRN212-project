@@ -1,11 +1,8 @@
 namespace RestaurantPOS.BusinessObjects;
 
-public enum CheckoutResult
+public enum AddItemsResult
 {
     Success,
-    OrderNotOpen,
     InsufficientStock,
-    Conflict,
-    NoOpenShift,
     Error
 }

@@ -32,4 +32,23 @@ public class UserDAO
             return false;
         }
     }
+
+    public static bool UpdateScheduledHours(int userId, TimeSpan? start, TimeSpan? end)
+    {
+        using var context = new AppDbContext();
+        try
+        {
+            var user = context.Users.FirstOrDefault(u => u.UserId == userId);
+            if (user == null) return false;
+            user.ScheduledStartTime = start;
+            user.ScheduledEndTime = end;
+            context.SaveChanges();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError($"{nameof(UserDAO)}.{nameof(UpdateScheduledHours)}", ex);
+            return false;
+        }
+    }
 }

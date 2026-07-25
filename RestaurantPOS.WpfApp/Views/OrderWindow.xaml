@@ -37,7 +37,11 @@
                 <Button Content="Gửi bếp" Command="{Binding SendToKitchenCommand}" Margin="0,0,0,8"
                         Style="{StaticResource MaterialDesignRaisedButton}" />
                 <Button Content="Chờ thanh toán" Command="{Binding MarkAwaitingPaymentCommand}" Margin="0,0,0,8" />
-                <Button Content="Thanh toán" Click="Checkout_Click" Style="{StaticResource MaterialDesignRaisedButton}" />
+                <Button Content="Thanh toán" Click="Checkout_Click" Style="{StaticResource MaterialDesignRaisedButton}" Margin="0,0,0,8" />
+
+                <TextBlock Text="Lý do hủy đơn" Margin="0,8,0,4" />
+                <TextBox Text="{Binding CancelReason, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8" />
+                <Button Content="Hủy đơn" Click="Cancel_Click" />
             </StackPanel>
 
             <TextBlock DockPanel.Dock="Top" Text="Đã gửi bếp:" FontWeight="Bold" Margin="0,8,0,4" />

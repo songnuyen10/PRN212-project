@@ -7,44 +7,44 @@ namespace RestaurantPOS.Tests;
 public class OrderServiceTests
 {
     [Fact]
-    public void AddItemToOrder_ReturnsFalse_WhenOrderIsNotOpen()
+    public void AddItemsToOrder_ReturnsError_WhenOrderIsNotOpen()
     {
         var orderRepository = new FakeOrderRepository();
         orderRepository.Seed(new Order { OrderId = 1, Status = OrderStatus.Paid });
         var service = new OrderService(orderRepository, new FakeRestaurantTableRepository());
 
-        var result = service.AddItemToOrder(orderId: 1, menuItemId: 1, quantity: 1);
+        var result = service.AddItemsToOrder(orderId: 1, lines: [(1, 1)]);
 
-        Assert.False(result);
-        Assert.False(orderRepository.AddItemToOrderWasCalled);
+        Assert.Equal(AddItemsResult.Error, result);
+        Assert.False(orderRepository.AddItemsToOrderWasCalled);
     }
 
     [Fact]
-    public void AddItemToOrder_Succeeds_WhenOrderIsOpen()
+    public void AddItemsToOrder_Succeeds_WhenOrderIsOpen()
     {
         var orderRepository = new FakeOrderRepository();
         orderRepository.Seed(new Order { OrderId = 1, Status = OrderStatus.Open });
         var service = new OrderService(orderRepository, new FakeRestaurantTableRepository());
 
-        var result = service.AddItemToOrder(orderId: 1, menuItemId: 1, quantity: 1);
+        var result = service.AddItemsToOrder(orderId: 1, lines: [(1, 1)]);
 
-        Assert.True(result);
-        Assert.True(orderRepository.AddItemToOrderWasCalled);
+        Assert.Equal(AddItemsResult.Success, result);
+        Assert.True(orderRepository.AddItemsToOrderWasCalled);
     }
 
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void AddItemToOrder_ReturnsFalse_WhenQuantityIsNotPositive(int quantity)
+    public void AddItemsToOrder_ReturnsError_WhenAnyQuantityIsNotPositive(int quantity)
     {
         var orderRepository = new FakeOrderRepository();
         orderRepository.Seed(new Order { OrderId = 1, Status = OrderStatus.Open });
         var service = new OrderService(orderRepository, new FakeRestaurantTableRepository());
 
-        var result = service.AddItemToOrder(orderId: 1, menuItemId: 1, quantity: quantity);
+        var result = service.AddItemsToOrder(orderId: 1, lines: [(1, quantity)]);
 
-        Assert.False(result);
-        Assert.False(orderRepository.AddItemToOrderWasCalled);
+        Assert.Equal(AddItemsResult.Error, result);
+        Assert.False(orderRepository.AddItemsToOrderWasCalled);
     }
 
     [Fact]
@@ -81,5 +81,41 @@ public class OrderServiceTests
         var result = service.CreateOrder(tableId: 999, openedByUserId: 7);
 
         Assert.Null(result);
+    }
+
+    [Fact]
+    public void CancelOrder_ReturnsFalse_WhenOrderIsNotOpen()
+    {
+        var orderRepository = new FakeOrderRepository();
+        orderRepository.Seed(new Order { OrderId = 1, Status = OrderStatus.Paid });
+        var service = new OrderService(orderRepository, new FakeRestaurantTableRepository());
+
+        var result = service.CancelOrder(orderId: 1, cancelledByUserId: 1, reason: "Nhầm bàn");
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void CancelOrder_ReturnsFalse_WhenReasonIsBlank()
+    {
+        var orderRepository = new FakeOrderRepository();
+        orderRepository.Seed(new Order { OrderId = 1, Status = OrderStatus.Open });
+        var service = new OrderService(orderRepository, new FakeRestaurantTableRepository());
+
+        var result = service.CancelOrder(orderId: 1, cancelledByUserId: 1, reason: "  ");
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void CancelOrder_Succeeds_WhenOrderIsOpenAndReasonProvided()
+    {
+        var orderRepository = new FakeOrderRepository();
+        orderRepository.Seed(new Order { OrderId = 1, Status = OrderStatus.Open });
+        var service = new OrderService(orderRepository, new FakeRestaurantTableRepository());
+
+        var result = service.CancelOrder(orderId: 1, cancelledByUserId: 1, reason: "Nhầm bàn");
+
+        Assert.True(result);
     }
 }

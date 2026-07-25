@@ -12,5 +12,17 @@ public class UserService : IUserService
         _userRepository = new UserRepository();
     }
 
+    // Test seam only — production code always uses the parameterless constructor.
+    public UserService(IUserRepository userRepository)
+    {
+        _userRepository = userRepository;
+    }
+
     public List<User> GetUsers() => _userRepository.GetUsers();
+
+    public bool UpdateScheduledHours(int userId, TimeSpan? start, TimeSpan? end)
+    {
+        if (start.HasValue && end.HasValue && end <= start) return false;
+        return _userRepository.UpdateScheduledHours(userId, start, end);
+    }
 }

@@ -15,8 +15,10 @@ public class PaymentViewModel : ViewModelBase
     public int OrderId { get; }
     public Order? CurrentOrder { get; }
 
-    // No open shift doesn't block checkout (see PaymentService.Checkout), but the
-    // cashier should know this payment won't land in any shift's cash reconciliation.
+    // Cash is blocked by PaymentService.Checkout when no shift is open; bank
+    // transfer still goes through. This is a one-time read (can go stale if the
+    // shift opens/closes while this window is up) — it's only a hint, the
+    // Service is the real enforcement point.
     public bool HasNoOpenShift { get; }
 
     private PaymentMethod _selectedMethod = PaymentMethod.Cash;
@@ -78,6 +80,7 @@ public class PaymentViewModel : ViewModelBase
             CheckoutResult.InsufficientStock => "Không đủ nguyên liệu để hoàn tất đơn hàng này.",
             CheckoutResult.Conflict => "Thanh toán thất bại — đơn hàng đã bị thay đổi bởi người khác.",
             CheckoutResult.OrderNotOpen => "Đơn hàng không còn ở trạng thái có thể thanh toán.",
+            CheckoutResult.NoOpenShift => "Chưa mở ca — không thu tiền mặt được. Mở ca ở menu Ca làm việc.",
             _ => "Thanh toán thất bại — vui lòng thử lại."
         };
 

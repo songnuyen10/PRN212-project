@@ -25,6 +25,7 @@ public class AppDbContext : DbContext
     public virtual DbSet<OrderItem> OrderItems { get; set; } = null!;
     public virtual DbSet<Payment> Payments { get; set; } = null!;
     public virtual DbSet<Shift> Shifts { get; set; } = null!;
+    public virtual DbSet<IngredientStockEntry> IngredientStockEntries { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -107,6 +108,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Order>(entity =>
         {
             entity.Property(o => o.RowVersion).IsRowVersion();
+            entity.Property(o => o.CancelReason).HasMaxLength(200);
 
             entity.HasOne(o => o.Table)
                 .WithMany(t => t.Orders)
@@ -176,6 +178,25 @@ public class AppDbContext : DbContext
             entity.HasOne(s => s.User)
                 .WithMany(u => u.Shifts)
                 .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<IngredientStockEntry>(entity =>
+        {
+            entity.Property(e => e.QuantityAdded).HasPrecision(10, 3);
+            entity.Property(e => e.Note).HasMaxLength(200);
+
+            // Cascade (not Restrict): stock history is meaningless once its ingredient
+            // is gone, and Restrict would make DeleteIngredient fail forever after the
+            // first ReceiveStock call.
+            entity.HasOne(e => e.Ingredient)
+                .WithMany()
+                .HasForeignKey(e => e.IngredientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 

@@ -9,7 +9,8 @@ public class FakeOrderRepository : IOrderRepository
 {
     private readonly Dictionary<int, Order> _orders = new();
     private int _nextOrderId = 1;
-    public bool AddItemToOrderWasCalled { get; private set; }
+    public bool AddItemsToOrderWasCalled { get; private set; }
+    public AddItemsResult ResultToReturn { get; set; } = AddItemsResult.Success;
 
     public void Seed(Order order) => _orders[order.OrderId] = order;
 
@@ -25,9 +26,18 @@ public class FakeOrderRepository : IOrderRepository
 
     public Order? GetOrderById(int orderId) => _orders.GetValueOrDefault(orderId);
 
-    public bool AddItemToOrder(int orderId, int menuItemId, int quantity)
+    public AddItemsResult AddItemsToOrder(int orderId, IReadOnlyList<(int MenuItemId, int Quantity)> lines)
     {
-        AddItemToOrderWasCalled = true;
+        AddItemsToOrderWasCalled = true;
+        return ResultToReturn;
+    }
+
+    public bool CancelOrder(int orderId, int cancelledByUserId, string reason)
+    {
+        if (!_orders.TryGetValue(orderId, out var order) || order.Status != OrderStatus.Open) return false;
+        order.Status = OrderStatus.Cancelled;
+        order.CancelledByUserId = cancelledByUserId;
+        order.CancelReason = reason;
         return true;
     }
 

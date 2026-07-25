@@ -11,6 +11,8 @@ public class DashboardViewModel : ViewModelBase
 {
     private readonly IDashboardService _dashboardService = new DashboardService();
 
+    public string ReportAuthor { get; } = SessionContext.CurrentUser!.FullName;
+
     public ISeries[] Series { get; private set; } = [];
     public Axis[] XAxes { get; private set; } = [];
 

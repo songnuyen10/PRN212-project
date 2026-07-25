@@ -59,22 +59,99 @@ public class OrderDAO
             .FirstOrDefault(o => o.OrderId == orderId);
     }
 
-    public static bool AddItemToOrder(int orderId, int menuItemId, int quantity)
+    // Sends a whole cart to the kitchen as one SaveChanges (was previously one
+    // call per line, so a mid-batch failure could leave a partial cart persisted).
+    // Also checks stock for (items already on the order + this batch) before
+    // writing anything — the earliest point in the flow the ingredient count is
+    // known, instead of leaving the cashier stuck at checkout with a full cart.
+    // ponytail: per-order guard only, doesn't see stock reserved by OTHER open
+    // orders — same accepted limit as the checkout guard in PaymentDAO below.
+    public static AddItemsResult AddItemsToOrder(int orderId, IReadOnlyList<(int MenuItemId, int Quantity)> lines)
     {
         using var context = new AppDbContext();
         try
         {
             var order = context.Orders.Include(o => o.OrderItems).FirstOrDefault(o => o.OrderId == orderId);
-            var menuItem = context.MenuItems.FirstOrDefault(m => m.MenuItemId == menuItemId);
-            if (order == null || menuItem == null) return false;
+            if (order == null || order.Status != OrderStatus.Open) return AddItemsResult.Error;
 
-            order.AddItem(menuItem, quantity);
+            var menuItemIds = order.OrderItems.Select(i => i.MenuItemId)
+                .Union(lines.Select(l => l.MenuItemId))
+                .Distinct()
+                .ToList();
+
+            var menuItems = context.MenuItems
+                .Include(m => m.MenuItemIngredients)
+                .ThenInclude(mi => mi.Ingredient)
+                .Where(m => menuItemIds.Contains(m.MenuItemId))
+                .ToDictionary(m => m.MenuItemId);
+
+            if (lines.Any(l => !menuItems.ContainsKey(l.MenuItemId))) return AddItemsResult.Error;
+
+            var ingredientsById = menuItems.Values
+                .SelectMany(m => m.MenuItemIngredients)
+                .Select(mi => mi.Ingredient)
+                .DistinctBy(i => i.IngredientId)
+                .ToDictionary(i => i.IngredientId);
+
+            var required = new Dictionary<int, decimal>();
+            void Accumulate(int menuItemId, int quantity)
+            {
+                foreach (var recipeLine in menuItems[menuItemId].MenuItemIngredients)
+                {
+                    required[recipeLine.IngredientId] = required.GetValueOrDefault(recipeLine.IngredientId) + recipeLine.QuantityRequired * quantity;
+                }
+            }
+            foreach (var item in order.OrderItems) Accumulate(item.MenuItemId, item.Quantity);
+            foreach (var line in lines) Accumulate(line.MenuItemId, line.Quantity);
+
+            foreach (var (ingredientId, quantityNeeded) in required)
+            {
+                if (ingredientsById[ingredientId].QuantityInStock < quantityNeeded) return AddItemsResult.InsufficientStock;
+            }
+
+            foreach (var line in lines)
+            {
+                order.AddItem(menuItems[line.MenuItemId], line.Quantity);
+            }
             context.SaveChanges();
-            return true;
+            return AddItemsResult.Success;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return AddItemsResult.Error;
         }
         catch (Exception ex)
         {
-            AppLogger.LogError($"{nameof(OrderDAO)}.{nameof(AddItemToOrder)}", ex);
+            AppLogger.LogError($"{nameof(OrderDAO)}.{nameof(AddItemsToOrder)}", ex);
+            return AddItemsResult.Error;
+        }
+    }
+
+    // Frees a mis-opened/no-longer-wanted table. Only an Open order can be
+    // cancelled — Paid stays immutable (see PaymentDAO guard below).
+    public static bool CancelOrder(int orderId, int cancelledByUserId, string reason)
+    {
+        using var context = new AppDbContext();
+        try
+        {
+            var order = context.Orders.Include(o => o.Table).FirstOrDefault(o => o.OrderId == orderId);
+            if (order == null || order.Status != OrderStatus.Open) return false;
+
+            order.Status = OrderStatus.Cancelled;
+            order.CancelledByUserId = cancelledByUserId;
+            order.CancelReason = reason;
+            order.Table.Status = TableStatus.Free;
+
+            context.SaveChanges();
+            return true;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return false;
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError($"{nameof(OrderDAO)}.{nameof(CancelOrder)}", ex);
             return false;
         }
     }

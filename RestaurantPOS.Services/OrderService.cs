@@ -34,15 +34,26 @@ public class OrderService : IOrderService
 
     public Order? GetOrderById(int orderId) => _orderRepository.GetOrderById(orderId);
 
-    public bool AddItemToOrder(int orderId, int menuItemId, int quantity)
+    public AddItemsResult AddItemsToOrder(int orderId, IReadOnlyList<(int MenuItemId, int Quantity)> lines)
     {
-        if (quantity <= 0) return false;
+        if (lines.Any(l => l.Quantity <= 0)) return AddItemsResult.Error;
 
         // Business rule: items can only be added to a still-open order.
         var order = _orderRepository.GetOrderById(orderId);
+        if (order == null || order.Status != OrderStatus.Open) return AddItemsResult.Error;
+
+        return _orderRepository.AddItemsToOrder(orderId, lines);
+    }
+
+    public bool CancelOrder(int orderId, int cancelledByUserId, string reason)
+    {
+        // Business rule: a cancel reason is required, and only an Open order can be cancelled.
+        if (string.IsNullOrWhiteSpace(reason)) return false;
+
+        var order = _orderRepository.GetOrderById(orderId);
         if (order == null || order.Status != OrderStatus.Open) return false;
 
-        return _orderRepository.AddItemToOrder(orderId, menuItemId, quantity);
+        return _orderRepository.CancelOrder(orderId, cancelledByUserId, reason);
     }
 
     public List<OrderItem> GetKitchenQueue() => _orderRepository.GetKitchenQueue();
