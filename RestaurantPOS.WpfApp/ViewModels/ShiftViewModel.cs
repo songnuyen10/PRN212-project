@@ -1,7 +1,10 @@
+using System.Diagnostics;
 using System.Windows.Threading;
 using RestaurantPOS.BusinessObjects;
+using RestaurantPOS.DataAccessObjects;
 using RestaurantPOS.Services;
 using RestaurantPOS.WpfApp.MVVM;
+using RestaurantPOS.WpfApp.Reports;
 
 namespace RestaurantPOS.WpfApp.ViewModels;
 
@@ -66,8 +69,8 @@ public class ShiftViewModel : ViewModelBase
     private bool _hasSummary;
     public bool HasSummary { get => _hasSummary; private set => SetField(ref _hasSummary, value); }
 
-    private ShiftSummary? _lastClosedSummary;
-    public ShiftSummary? LastClosedSummary
+    private ShiftReport? _lastClosedSummary;
+    public ShiftReport? LastClosedSummary
     {
         get => _lastClosedSummary;
         private set => SetField(ref _lastClosedSummary, value);
@@ -79,6 +82,7 @@ public class ShiftViewModel : ViewModelBase
     public RelayCommand CloseShiftCommand { get; }
     public RelayCommand SaveScheduledHoursCommand { get; }
     public RelayCommand DismissSummaryCommand { get; }
+    public RelayCommand PrintShiftReportCommand { get; }
 
     public ShiftViewModel()
     {
@@ -90,13 +94,16 @@ public class ShiftViewModel : ViewModelBase
         CloseShiftCommand = new RelayCommand(_ => CloseCurrentShift(), _ => HasOpenShift);
         SaveScheduledHoursCommand = new RelayCommand(_ => SaveScheduledHours());
         DismissSummaryCommand = new RelayCommand(_ => DismissSummary());
+        PrintShiftReportCommand = new RelayCommand(_ => PrintShiftReport(), _ => LastClosedSummary != null);
 
         _timer.Tick += (_, _) => UpdateElapsedText();
 
         Load();
     }
 
-    private void Load()
+    // Public so ShiftWindow can refresh reconciliation numbers on window Activated —
+    // see ShiftWindow.xaml.cs.
+    public void Load()
     {
         OpenShift = _shiftService.GetOpenShift(_userId);
         Reconciliation = OpenShift == null ? null : _shiftService.GetReconciliation(OpenShift.ShiftId);
@@ -146,13 +153,18 @@ public class ShiftViewModel : ViewModelBase
         }
 
         var user = SessionContext.CurrentUser!;
-        LastClosedSummary = new ShiftSummary
+        // Re-fetch rather than trusting the VM's Reconciliation field, which may be
+        // stale if a payment landed between the last Load() and this close.
+        var reconciliation = _shiftService.GetReconciliation(openShift.ShiftId);
+        LastClosedSummary = new ShiftReport
         {
+            ShiftId = openShift.ShiftId,
             UserFullName = user.FullName,
             OpeningCash = openShift.OpeningCash,
             ClosingCash = ClosingCash,
             OpenedAt = openShift.OpenedAt,
             ClosedAt = DateTime.Now,
+            CashPayments = reconciliation.CashPayments,
             ScheduledStart = user.ScheduledStartTime,
             ScheduledEnd = user.ScheduledEndTime
         };
@@ -167,6 +179,22 @@ public class ShiftViewModel : ViewModelBase
         LastClosedSummary = null;
         HasSummary = false;
         OnPropertyChanged(nameof(ShowNoShiftPanel));
+    }
+
+    private void PrintShiftReport()
+    {
+        if (LastClosedSummary == null) return;
+        try
+        {
+            var pdfPath = ShiftReportBuilder.BuildPdf(LastClosedSummary);
+            Process.Start(new ProcessStartInfo(pdfPath) { UseShellExecute = true });
+            ErrorMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError($"{nameof(ShiftViewModel)}.{nameof(PrintShiftReport)}", ex);
+            ErrorMessage = "Không thể in báo cáo ca.";
+        }
     }
 
     private void SaveScheduledHours()

@@ -12,4 +12,6 @@ public class ShiftRepository : IShiftRepository
     public bool OpenShift(int userId, decimal openingCash) => ShiftDAO.OpenShift(userId, openingCash);
 
     public bool CloseShift(int shiftId, decimal closingCash) => ShiftDAO.CloseShift(shiftId, closingCash);
+
+    public List<Shift> GetClosedShifts(DateTime from, DateTime to) => ShiftDAO.GetClosedShifts(from, to);
 }

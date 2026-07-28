@@ -16,4 +16,10 @@ public class FakeShiftRepository : IShiftRepository
     public bool OpenShift(int userId, decimal openingCash) => true;
 
     public bool CloseShift(int shiftId, decimal closingCash) => true;
+
+    public List<Shift> GetClosedShifts(DateTime from, DateTime to) =>
+        _shifts.Values
+            .Where(s => s.ClosedAt != null && s.OpenedAt >= from && s.OpenedAt <= to)
+            .OrderByDescending(s => s.OpenedAt)
+            .ToList();
 }

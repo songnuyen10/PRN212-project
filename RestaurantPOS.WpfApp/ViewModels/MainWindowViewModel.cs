@@ -19,6 +19,7 @@ public class MainWindowViewModel : ViewModelBase
     public bool CanSeeMenu { get; }
     public bool CanSeeInventory { get; }
     public bool CanSeeDashboard { get; }
+    public bool CanSeeShiftHistory { get; }
 
     private string _shiftStatusText = string.Empty;
     public string ShiftStatusText
@@ -49,6 +50,7 @@ public class MainWindowViewModel : ViewModelBase
         CanSeeMenu = user.Role == UserRole.Admin;
         CanSeeInventory = user.Role == UserRole.Admin;
         CanSeeDashboard = user.Role == UserRole.Admin;
+        CanSeeShiftHistory = user.Role == UserRole.Admin;
     }
 
     // Called on MainWindow.Activated — also covers the initial load, so the ctor

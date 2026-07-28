@@ -44,4 +44,20 @@ public class ShiftService : IShiftService
 
         return new ShiftReconciliation(openingCash, cashPayments, openingCash + cashPayments);
     }
+
+    public List<ShiftReport> GetShiftHistory(DateTime from, DateTime to) =>
+        _shiftRepository.GetClosedShifts(from, to)
+            .Select(s => new ShiftReport
+            {
+                ShiftId = s.ShiftId,
+                UserFullName = s.User.FullName,
+                OpenedAt = s.OpenedAt,
+                ClosedAt = s.ClosedAt!.Value,
+                OpeningCash = s.OpeningCash,
+                ClosingCash = s.ClosingCash ?? 0m,
+                CashPayments = s.Payments.Where(p => p.Method == PaymentMethod.Cash).Sum(p => p.AmountPaid),
+                ScheduledStart = s.User.ScheduledStartTime,
+                ScheduledEnd = s.User.ScheduledEndTime
+            })
+            .ToList();
 }

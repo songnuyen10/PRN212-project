@@ -15,6 +15,10 @@ public partial class ShiftWindow : Window
         InitializeComponent();
         Closing += ShiftWindow_Closing;
         Closed += (_, _) => ((ShiftViewModel)DataContext).StopTimer();
+        // Refresh reconciliation numbers whenever this window regains focus — a
+        // payment taken elsewhere (e.g. PaymentWindow) while this stays open would
+        // otherwise leave stale "expected cash" on screen for the cashier to close against.
+        Activated += (_, _) => ((ShiftViewModel)DataContext).Load();
     }
 
     // Used when MainWindow opens this as a post-login gate — forceOpen blocks the

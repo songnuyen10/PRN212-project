@@ -61,6 +61,8 @@ public partial class MainWindow : Window
 
     private void MnuDashboard_Click(object sender, RoutedEventArgs e) => ShowSingle<DashboardWindow>();
 
+    private void MnuShiftHistory_Click(object sender, RoutedEventArgs e) => ShowSingle<ShiftHistoryWindow>();
+
     private void Logout_Click(object sender, RoutedEventArgs e)
     {
         var button = (UIElement)sender;
