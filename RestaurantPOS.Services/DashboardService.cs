@@ -6,19 +6,19 @@ namespace RestaurantPOS.Services;
 public class DashboardService : IDashboardService
 {
     private readonly IPaymentRepository _paymentRepository;
-    private readonly IIngredientRepository _ingredientRepository;
+    private readonly IIngredientService _ingredientService;
 
     public DashboardService()
     {
         _paymentRepository = new PaymentRepository();
-        _ingredientRepository = new IngredientRepository();
+        _ingredientService = new IngredientService();
     }
 
     // Test seam only — production code always uses the parameterless constructor.
-    public DashboardService(IPaymentRepository paymentRepository, IIngredientRepository ingredientRepository)
+    public DashboardService(IPaymentRepository paymentRepository, IIngredientService ingredientService)
     {
         _paymentRepository = paymentRepository;
-        _ingredientRepository = ingredientRepository;
+        _ingredientService = ingredientService;
     }
 
     public List<RevenuePoint> GetDailyRevenue(DateTime from, DateTime to)
@@ -36,13 +36,12 @@ public class DashboardService : IDashboardService
         var payments = _paymentRepository.GetPaymentsBetween(from, to);
         return payments
             .SelectMany(p => p.Order.OrderItems)
-            .GroupBy(i => i.MenuItem.ItemName)
-            .Select(g => new TopSellerLine(g.Key, g.Sum(i => i.Quantity), g.Sum(i => i.Quantity * i.UnitPrice)))
+            .GroupBy(i => i.MenuItemId)
+            .Select(g => new TopSellerLine(g.First().MenuItem.ItemName, g.Sum(i => i.Quantity), g.Sum(i => i.Quantity * i.UnitPrice)))
             .OrderByDescending(l => l.QuantitySold)
             .Take(top)
             .ToList();
     }
 
-    public List<Ingredient> GetLowStockIngredients() =>
-        _ingredientRepository.GetIngredients().Where(i => i.IsLowStock).ToList();
+    public List<Ingredient> GetLowStockIngredients() => _ingredientService.GetLowStockIngredients();
 }
