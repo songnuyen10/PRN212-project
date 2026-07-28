@@ -22,7 +22,8 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                     IngredientName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     QuantityInStock = table.Column<decimal>(type: "decimal(10,3)", precision: 10, scale: 3, nullable: false),
                     Unit = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    LowStockThreshold = table.Column<decimal>(type: "decimal(10,3)", precision: 10, scale: 3, nullable: false)
+                    LowStockThreshold = table.Column<decimal>(type: "decimal(10,3)", precision: 10, scale: 3, nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -67,7 +68,9 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                     PasswordHash = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
                     PasswordSalt = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
                     FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Role = table.Column<int>(type: "int", nullable: false)
+                    Role = table.Column<int>(type: "int", nullable: false),
+                    ScheduledStartTime = table.Column<TimeSpan>(type: "time", nullable: true),
+                    ScheduledEndTime = table.Column<TimeSpan>(type: "time", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -97,6 +100,35 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "IngredientStockEntries",
+                columns: table => new
+                {
+                    IngredientStockEntryId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IngredientId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    QuantityAdded = table.Column<decimal>(type: "decimal(10,3)", precision: 10, scale: 3, nullable: false),
+                    ReceivedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Note = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IngredientStockEntries", x => x.IngredientStockEntryId);
+                    table.ForeignKey(
+                        name: "FK_IngredientStockEntries_Ingredients_IngredientId",
+                        column: x => x.IngredientId,
+                        principalTable: "Ingredients",
+                        principalColumn: "IngredientId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_IngredientStockEntries_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Orders",
                 columns: table => new
                 {
@@ -106,7 +138,9 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
                     TableId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: true)
+                    OpenedByUserId = table.Column<int>(type: "int", nullable: false),
+                    CancelledByUserId = table.Column<int>(type: "int", nullable: true),
+                    CancelReason = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -118,10 +152,11 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                         principalColumn: "TableId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Orders_Users_UserId",
-                        column: x => x.UserId,
+                        name: "FK_Orders_Users_OpenedByUserId",
+                        column: x => x.OpenedByUserId,
                         principalTable: "Users",
-                        principalColumn: "UserId");
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -209,6 +244,7 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     OrderId = table.Column<int>(type: "int", nullable: false),
                     CashierUserId = table.Column<int>(type: "int", nullable: false),
+                    ShiftId = table.Column<int>(type: "int", nullable: true),
                     AmountPaid = table.Column<decimal>(type: "money", nullable: false),
                     Method = table.Column<int>(type: "int", nullable: false),
                     PaidAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -221,6 +257,12 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                         column: x => x.OrderId,
                         principalTable: "Orders",
                         principalColumn: "OrderId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Payments_Shifts_ShiftId",
+                        column: x => x.ShiftId,
+                        principalTable: "Shifts",
+                        principalColumn: "ShiftId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Payments_Users_CashierUserId",
@@ -267,8 +309,8 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "UserId", "FullName", "PasswordHash", "PasswordSalt", "Role", "Username" },
-                values: new object[] { 1, "Administrator", new byte[] { 137, 24, 11, 117, 186, 133, 166, 44, 180, 241, 70, 149, 120, 226, 77, 217, 4, 142, 123, 149, 4, 173, 21, 24, 13, 219, 101, 111, 63, 70, 162, 48 }, new byte[] { 75, 180, 23, 138, 140, 83, 101, 7, 171, 19, 103, 8, 169, 181, 106, 39 }, 0, "admin" });
+                columns: new[] { "UserId", "FullName", "PasswordHash", "PasswordSalt", "Role", "ScheduledEndTime", "ScheduledStartTime", "Username" },
+                values: new object[] { 1, "Administrator", new byte[] { 137, 24, 11, 117, 186, 133, 166, 44, 180, 241, 70, 149, 120, 226, 77, 217, 4, 142, 123, 149, 4, 173, 21, 24, 13, 219, 101, 111, 63, 70, 162, 48 }, new byte[] { 75, 180, 23, 138, 140, 83, 101, 7, 171, 19, 103, 8, 169, 181, 106, 39 }, 0, null, null, "admin" });
 
             migrationBuilder.InsertData(
                 table: "MenuItems",
@@ -294,6 +336,16 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_IngredientStockEntries_IngredientId",
+                table: "IngredientStockEntries",
+                column: "IngredientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_IngredientStockEntries_UserId",
+                table: "IngredientStockEntries",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MenuItemIngredients_IngredientId",
                 table: "MenuItemIngredients",
                 column: "IngredientId");
@@ -314,14 +366,14 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                 column: "OrderId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Orders_OpenedByUserId",
+                table: "Orders",
+                column: "OpenedByUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Orders_TableId",
                 table: "Orders",
                 column: "TableId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Orders_UserId",
-                table: "Orders",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_CashierUserId",
@@ -335,9 +387,16 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Payments_ShiftId",
+                table: "Payments",
+                column: "ShiftId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Shifts_UserId",
                 table: "Shifts",
-                column: "UserId");
+                column: "UserId",
+                unique: true,
+                filter: "[ClosedAt] IS NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Username",
@@ -350,6 +409,9 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "IngredientStockEntries");
+
+            migrationBuilder.DropTable(
                 name: "MenuItemIngredients");
 
             migrationBuilder.DropTable(
@@ -359,9 +421,6 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                 name: "Payments");
 
             migrationBuilder.DropTable(
-                name: "Shifts");
-
-            migrationBuilder.DropTable(
                 name: "Ingredients");
 
             migrationBuilder.DropTable(
@@ -369,6 +428,9 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
 
             migrationBuilder.DropTable(
                 name: "Orders");
+
+            migrationBuilder.DropTable(
+                name: "Shifts");
 
             migrationBuilder.DropTable(
                 name: "MenuCategories");
