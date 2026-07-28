@@ -12,7 +12,7 @@ using RestaurantPOS.DataAccessObjects;
 namespace RestaurantPOS.DataAccessObjects.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260708131002_InitialCreate")]
+    [Migration("20260728150235_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -45,6 +45,12 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                     b.Property<decimal>("QuantityInStock")
                         .HasPrecision(10, 3)
                         .HasColumnType("decimal(10,3)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<string>("Unit")
                         .IsRequired()
@@ -96,6 +102,40 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                             QuantityInStock = 5m,
                             Unit = "kg"
                         });
+                });
+
+            modelBuilder.Entity("RestaurantPOS.BusinessObjects.IngredientStockEntry", b =>
+                {
+                    b.Property<int>("IngredientStockEntryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IngredientStockEntryId"));
+
+                    b.Property<int>("IngredientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal>("QuantityAdded")
+                        .HasPrecision(10, 3)
+                        .HasColumnType("decimal(10,3)");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("IngredientStockEntryId");
+
+                    b.HasIndex("IngredientId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("IngredientStockEntries");
                 });
 
             modelBuilder.Entity("RestaurantPOS.BusinessObjects.MenuCategory", b =>
@@ -255,8 +295,18 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
 
+                    b.Property<string>("CancelReason")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("CancelledByUserId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("OpenedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("OpenedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -270,14 +320,11 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                     b.Property<int>("TableId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("OrderId");
 
-                    b.HasIndex("TableId");
+                    b.HasIndex("OpenedByUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("TableId");
 
                     b.ToTable("Orders");
                 });
@@ -337,12 +384,17 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                     b.Property<DateTime>("PaidAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("ShiftId")
+                        .HasColumnType("int");
+
                     b.HasKey("PaymentId");
 
                     b.HasIndex("CashierUserId");
 
                     b.HasIndex("OrderId")
                         .IsUnique();
+
+                    b.HasIndex("ShiftId");
 
                     b.ToTable("Payments");
                 });
@@ -440,7 +492,9 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
 
                     b.HasKey("ShiftId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[ClosedAt] IS NULL");
 
                     b.ToTable("Shifts");
                 });
@@ -469,6 +523,12 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
+                    b.Property<TimeSpan?>("ScheduledEndTime")
+                        .HasColumnType("time");
+
+                    b.Property<TimeSpan?>("ScheduledStartTime")
+                        .HasColumnType("time");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -491,6 +551,25 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                             Role = 0,
                             Username = "admin"
                         });
+                });
+
+            modelBuilder.Entity("RestaurantPOS.BusinessObjects.IngredientStockEntry", b =>
+                {
+                    b.HasOne("RestaurantPOS.BusinessObjects.Ingredient", "Ingredient")
+                        .WithMany()
+                        .HasForeignKey("IngredientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RestaurantPOS.BusinessObjects.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Ingredient");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RestaurantPOS.BusinessObjects.MenuItem", b =>
@@ -525,15 +604,19 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
 
             modelBuilder.Entity("RestaurantPOS.BusinessObjects.Order", b =>
                 {
+                    b.HasOne("RestaurantPOS.BusinessObjects.User", "OpenedByUser")
+                        .WithMany("Orders")
+                        .HasForeignKey("OpenedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("RestaurantPOS.BusinessObjects.RestaurantTable", "Table")
                         .WithMany("Orders")
                         .HasForeignKey("TableId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("RestaurantPOS.BusinessObjects.User", null)
-                        .WithMany("Orders")
-                        .HasForeignKey("UserId");
+                    b.Navigation("OpenedByUser");
 
                     b.Navigation("Table");
                 });
@@ -571,9 +654,16 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("RestaurantPOS.BusinessObjects.Shift", "Shift")
+                        .WithMany("Payments")
+                        .HasForeignKey("ShiftId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("CashierUser");
 
                     b.Navigation("Order");
+
+                    b.Navigation("Shift");
                 });
 
             modelBuilder.Entity("RestaurantPOS.BusinessObjects.Shift", b =>
@@ -614,6 +704,11 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
             modelBuilder.Entity("RestaurantPOS.BusinessObjects.RestaurantTable", b =>
                 {
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("RestaurantPOS.BusinessObjects.Shift", b =>
+                {
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("RestaurantPOS.BusinessObjects.User", b =>
