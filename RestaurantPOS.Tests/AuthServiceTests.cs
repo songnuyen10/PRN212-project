@@ -55,4 +55,16 @@ public class AuthServiceTests
         Assert.NotNull(result);
         Assert.Equal("New Cashier", result!.FullName);
     }
+
+    [Fact]
+    public void CreateUser_ReturnsFalse_WhenUsernameAlreadyExists()
+    {
+        var userRepository = new FakeUserRepository();
+        userRepository.Seed(new User { UserId = 1, Username = "cashier1", FullName = "Cashier One", Role = UserRole.Cashier });
+        var service = new AuthService(userRepository);
+
+        var result = service.CreateUser("cashier1", "Secret@1", "Duplicate", UserRole.Cashier);
+
+        Assert.False(result);
+    }
 }

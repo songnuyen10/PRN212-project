@@ -27,6 +27,8 @@ public class AuthService : IAuthService
 
     public bool CreateUser(string username, string password, string fullName, UserRole role)
     {
+        if (_userRepository.GetUserByUsername(username) != null) return false;
+
         var (hash, salt) = PasswordHasher.Hash(password);
         var user = new User
         {
