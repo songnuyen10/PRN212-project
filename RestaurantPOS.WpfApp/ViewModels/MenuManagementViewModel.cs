@@ -93,7 +93,7 @@ public class MenuManagementViewModel : ViewModelBase
     {
         if (!_categoryService.SaveCategory(new MenuCategory { CategoryName = NewCategoryName }))
         {
-            ErrorMessage = "Không thể thêm danh mục.";
+            ErrorMessage = "Không thể thêm danh mục — tên có thể đã tồn tại.";
             return;
         }
         ErrorMessage = string.Empty;
@@ -133,7 +133,7 @@ public class MenuManagementViewModel : ViewModelBase
             IsAvailable = InputIsAvailable
         }))
         {
-            ErrorMessage = "Không thể thêm món.";
+            ErrorMessage = "Không thể thêm món — tên có thể đã tồn tại.";
             return;
         }
         ErrorMessage = string.Empty;
@@ -155,7 +155,7 @@ public class MenuManagementViewModel : ViewModelBase
         SelectedMenuItem.IsAvailable = InputIsAvailable;
         if (!_menuItemService.UpdateMenuItem(SelectedMenuItem))
         {
-            ErrorMessage = "Không thể cập nhật món.";
+            ErrorMessage = "Không thể cập nhật món — tên có thể đã tồn tại.";
             return;
         }
         ErrorMessage = string.Empty;
