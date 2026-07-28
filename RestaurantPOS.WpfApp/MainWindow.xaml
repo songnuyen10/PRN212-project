@@ -24,6 +24,8 @@
                       Visibility="{Binding CanSeeInventory, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <MenuItem Header="Báo cáo" Name="MnuDashboard" Click="MnuDashboard_Click"
                       Visibility="{Binding CanSeeDashboard, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <MenuItem Header="Lịch sử ca" Name="MnuShiftHistory" Click="MnuShiftHistory_Click"
+                      Visibility="{Binding CanSeeShiftHistory, Converter={StaticResource BooleanToVisibilityConverter}}" />
         </Menu>
 
         <StatusBar DockPanel.Dock="Bottom">

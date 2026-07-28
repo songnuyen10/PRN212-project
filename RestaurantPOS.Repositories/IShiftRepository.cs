@@ -8,4 +8,5 @@ public interface IShiftRepository
     Shift? GetShiftById(int shiftId);
     bool OpenShift(int userId, decimal openingCash);
     bool CloseShift(int shiftId, decimal closingCash);
+    List<Shift> GetClosedShifts(DateTime from, DateTime to);
 }

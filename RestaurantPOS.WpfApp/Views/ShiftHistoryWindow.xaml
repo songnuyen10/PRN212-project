@@ -1,0 +1,41 @@
+<Window x:Class="RestaurantPOS.WpfApp.Views.ShiftHistoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:RestaurantPOS.WpfApp.ViewModels"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        Title="Lịch sử ca làm việc" Height="600" Width="900"
+        WindowStartupLocation="CenterScreen">
+    <Window.DataContext>
+        <vm:ShiftHistoryViewModel />
+    </Window.DataContext>
+    <DockPanel Margin="16">
+        <TextBlock DockPanel.Dock="Top" Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8" />
+
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,16">
+            <TextBlock Text="Từ:" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <DatePicker SelectedDate="{Binding FromDate}" Margin="0,0,16,0" />
+            <TextBlock Text="Đến:" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <DatePicker SelectedDate="{Binding ToDate}" Margin="0,0,16,0" />
+            <Button Content="Làm mới" Command="{Binding RefreshCommand}" Style="{StaticResource MaterialDesignRaisedButton}" Margin="0,0,16,0" />
+            <Button Content="In báo cáo ca" Command="{Binding PrintCommand}" Style="{StaticResource MaterialDesignRaisedButton}" />
+        </StackPanel>
+
+        <TextBlock DockPanel.Dock="Top" Text="Ca tính theo ngày mở ca — ca mở khuya, đóng sau 0h vẫn thuộc về ngày mở ca." Foreground="Gray" Margin="0,0,0,8" />
+
+        <DataGrid ItemsSource="{Binding Shifts}" SelectedItem="{Binding SelectedShift}"
+                  AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Nhân viên" Binding="{Binding UserFullName}" Width="140" />
+                <DataGridTextColumn Header="Mở ca" Binding="{Binding OpenedAt, StringFormat='HH:mm dd/MM/yyyy'}" Width="130" />
+                <DataGridTextColumn Header="Đóng ca" Binding="{Binding ClosedAt, StringFormat='HH:mm dd/MM/yyyy'}" Width="130" />
+                <DataGridTextColumn Header="Tiền đầu" Binding="{Binding OpeningCash, StringFormat=N0}" Width="100" />
+                <DataGridTextColumn Header="Tiền cuối" Binding="{Binding ClosingCash, StringFormat=N0}" Width="100" />
+                <DataGridTextColumn Header="Doanh thu tiền mặt" Binding="{Binding CashPayments, StringFormat=N0}" Width="130" />
+                <DataGridTextColumn Header="Dự kiến" Binding="{Binding ExpectedCash, StringFormat=N0}" Width="100" />
+                <DataGridTextColumn Header="Chênh lệch" Binding="{Binding Variance, StringFormat=N0}" Width="100" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</Window>
