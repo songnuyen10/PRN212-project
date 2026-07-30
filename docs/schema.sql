@@ -13,7 +13,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE TABLE [Ingredients] (
@@ -30,7 +30,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE TABLE [MenuCategories] (
@@ -43,7 +43,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE TABLE [RestaurantTables] (
@@ -58,7 +58,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE TABLE [Users] (
@@ -77,7 +77,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE TABLE [MenuItems] (
@@ -94,7 +94,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE TABLE [IngredientStockEntries] (
@@ -113,7 +113,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE TABLE [Orders] (
@@ -134,7 +134,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE TABLE [Shifts] (
@@ -152,7 +152,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE TABLE [MenuItemIngredients] (
@@ -168,7 +168,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE TABLE [OrderItems] (
@@ -187,7 +187,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE TABLE [Payments] (
@@ -208,7 +208,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'IngredientId', N'IngredientName', N'LowStockThreshold', N'QuantityInStock', N'Unit') AND [object_id] = OBJECT_ID(N'[Ingredients]'))
@@ -226,7 +226,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'MenuCategoryId', N'CategoryName') AND [object_id] = OBJECT_ID(N'[MenuCategories]'))
@@ -242,7 +242,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'TableId', N'Capacity', N'Status', N'TableName') AND [object_id] = OBJECT_ID(N'[RestaurantTables]'))
@@ -261,13 +261,15 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'UserId', N'FullName', N'PasswordHash', N'PasswordSalt', N'Role', N'ScheduledEndTime', N'ScheduledStartTime', N'Username') AND [object_id] = OBJECT_ID(N'[Users]'))
         SET IDENTITY_INSERT [Users] ON;
     EXEC(N'INSERT INTO [Users] ([UserId], [FullName], [PasswordHash], [PasswordSalt], [Role], [ScheduledEndTime], [ScheduledStartTime], [Username])
-    VALUES (1, N''Administrator'', 0x89180B75BA85A62CB4F1469578E24DD9048E7B9504AD15180DDB656F3F46A230, 0x4BB4178A8C536507AB136708A9B56A27, 0, NULL, NULL, N''admin'')');
+    VALUES (1, N''Administrator'', 0x89180B75BA85A62CB4F1469578E24DD9048E7B9504AD15180DDB656F3F46A230, 0x4BB4178A8C536507AB136708A9B56A27, 0, NULL, NULL, N''admin''),
+    (2, N''Cashier One'', 0x1B422E8E95313600AE57378EF3F7E64B35C6BD7BB1338A6DCD686DEEDC19A3D8, 0x62A5B830B4421B696430BECFD5968635, 1, NULL, NULL, N''cashier1''),
+    (3, N''Kitchen Staff One'', 0xD4CCB1D6B4FEFA96EA286B77F9D9F6B83E27B5240A844A01069FFF868C639C71, 0x53168F3B4D9A95AE3E38743F714D8733, 2, NULL, NULL, N''kitchen1'')');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'UserId', N'FullName', N'PasswordHash', N'PasswordSalt', N'Role', N'ScheduledEndTime', N'ScheduledStartTime', N'Username') AND [object_id] = OBJECT_ID(N'[Users]'))
         SET IDENTITY_INSERT [Users] OFF;
 END;
@@ -275,7 +277,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'MenuItemId', N'IsAvailable', N'ItemName', N'MenuCategoryId', N'Price') AND [object_id] = OBJECT_ID(N'[MenuItems]'))
@@ -292,7 +294,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'IngredientId', N'MenuItemId', N'QuantityRequired') AND [object_id] = OBJECT_ID(N'[MenuItemIngredients]'))
@@ -310,7 +312,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE INDEX [IX_IngredientStockEntries_IngredientId] ON [IngredientStockEntries] ([IngredientId]);
@@ -319,7 +321,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE INDEX [IX_IngredientStockEntries_UserId] ON [IngredientStockEntries] ([UserId]);
@@ -328,7 +330,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE INDEX [IX_MenuItemIngredients_IngredientId] ON [MenuItemIngredients] ([IngredientId]);
@@ -337,7 +339,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE INDEX [IX_MenuItems_MenuCategoryId] ON [MenuItems] ([MenuCategoryId]);
@@ -346,7 +348,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE INDEX [IX_OrderItems_MenuItemId] ON [OrderItems] ([MenuItemId]);
@@ -355,7 +357,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE INDEX [IX_OrderItems_OrderId] ON [OrderItems] ([OrderId]);
@@ -364,7 +366,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE INDEX [IX_Orders_OpenedByUserId] ON [Orders] ([OpenedByUserId]);
@@ -373,7 +375,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE INDEX [IX_Orders_TableId] ON [Orders] ([TableId]);
@@ -382,7 +384,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE INDEX [IX_Payments_CashierUserId] ON [Payments] ([CashierUserId]);
@@ -391,7 +393,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE UNIQUE INDEX [IX_Payments_OrderId] ON [Payments] ([OrderId]);
@@ -400,7 +402,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE INDEX [IX_Payments_ShiftId] ON [Payments] ([ShiftId]);
@@ -409,7 +411,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     EXEC(N'CREATE UNIQUE INDEX [IX_Shifts_UserId] ON [Shifts] ([UserId]) WHERE [ClosedAt] IS NULL');
@@ -418,7 +420,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     CREATE UNIQUE INDEX [IX_Users_Username] ON [Users] ([Username]);
@@ -427,11 +429,11 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260728150235_InitialCreate'
+    WHERE [MigrationId] = N'20260730131601_InitialCreate'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260728150235_InitialCreate', N'8.0.11');
+    VALUES (N'20260730131601_InitialCreate', N'8.0.11');
 END;
 GO
 

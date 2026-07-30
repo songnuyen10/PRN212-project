@@ -547,6 +547,24 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
                             PasswordSalt = new byte[] { 75, 180, 23, 138, 140, 83, 101, 7, 171, 19, 103, 8, 169, 181, 106, 39 },
                             Role = 0,
                             Username = "admin"
+                        },
+                        new
+                        {
+                            UserId = 2,
+                            FullName = "Cashier One",
+                            PasswordHash = new byte[] { 27, 66, 46, 142, 149, 49, 54, 0, 174, 87, 55, 142, 243, 247, 230, 75, 53, 198, 189, 123, 177, 51, 138, 109, 205, 104, 109, 238, 220, 25, 163, 216 },
+                            PasswordSalt = new byte[] { 98, 165, 184, 48, 180, 66, 27, 105, 100, 48, 190, 207, 213, 150, 134, 53 },
+                            Role = 1,
+                            Username = "cashier1"
+                        },
+                        new
+                        {
+                            UserId = 3,
+                            FullName = "Kitchen Staff One",
+                            PasswordHash = new byte[] { 212, 204, 177, 214, 180, 254, 250, 150, 234, 40, 107, 119, 249, 217, 246, 184, 62, 39, 181, 36, 10, 132, 74, 1, 6, 159, 255, 134, 140, 99, 156, 113 },
+                            PasswordSalt = new byte[] { 83, 22, 143, 59, 77, 154, 149, 174, 62, 56, 116, 63, 113, 77, 135, 51 },
+                            Role = 2,
+                            Username = "kitchen1"
                         });
                 });
 
