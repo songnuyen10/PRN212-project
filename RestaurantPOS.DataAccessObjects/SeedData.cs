@@ -4,14 +4,15 @@ using RestaurantPOS.BusinessObjects;
 namespace RestaurantPOS.DataAccessObjects;
 
 // Initial data per Report 1 §6.3 ("Initialize SQL Server database with seed data:
-// menu items, user roles"). The admin password hash/salt below is a fixed,
-// pre-computed PBKDF2 pair (see docs/adr/0002) for "Admin@123" — computed once so
-// migrations stay stable instead of regenerating a random salt on every model build.
+// menu items, user roles"). Password hashes/salts below are fixed, pre-computed
+// PBKDF2 pairs (see docs/adr/0002) — computed once so migrations stay stable
+// instead of regenerating a random salt on every model build.
 public static class SeedData
 {
     public static void Apply(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>().HasData(new User
+        modelBuilder.Entity<User>().HasData(
+        new User
         {
             UserId = 1,
             Username = "admin",
@@ -19,6 +20,26 @@ public static class SeedData
             Role = UserRole.Admin,
             PasswordSalt = Convert.FromHexString("4bb4178a8c536507ab136708a9b56a27"),
             PasswordHash = Convert.FromHexString("89180b75ba85a62cb4f1469578e24dd9048e7b9504ad15180ddb656f3f46a230")
+        },
+        new User
+        {
+            UserId = 2,
+            Username = "cashier1",
+            FullName = "Cashier One",
+            Role = UserRole.Cashier,
+            // Password: "Cashier@123"
+            PasswordSalt = Convert.FromHexString("62A5B830B4421B696430BECFD5968635"),
+            PasswordHash = Convert.FromHexString("1B422E8E95313600AE57378EF3F7E64B35C6BD7BB1338A6DCD686DEEDC19A3D8")
+        },
+        new User
+        {
+            UserId = 3,
+            Username = "kitchen1",
+            FullName = "Kitchen Staff One",
+            Role = UserRole.KitchenStaff,
+            // Password: "Kitchen@123"
+            PasswordSalt = Convert.FromHexString("53168F3B4D9A95AE3E38743F714D8733"),
+            PasswordHash = Convert.FromHexString("D4CCB1D6B4FEFA96EA286B77F9D9F6B83E27B5240A844A01069FFF868C639C71")
         });
 
         modelBuilder.Entity<RestaurantTable>().HasData(

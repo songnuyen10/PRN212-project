@@ -310,7 +310,12 @@ namespace RestaurantPOS.DataAccessObjects.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "UserId", "FullName", "PasswordHash", "PasswordSalt", "Role", "ScheduledEndTime", "ScheduledStartTime", "Username" },
-                values: new object[] { 1, "Administrator", new byte[] { 137, 24, 11, 117, 186, 133, 166, 44, 180, 241, 70, 149, 120, 226, 77, 217, 4, 142, 123, 149, 4, 173, 21, 24, 13, 219, 101, 111, 63, 70, 162, 48 }, new byte[] { 75, 180, 23, 138, 140, 83, 101, 7, 171, 19, 103, 8, 169, 181, 106, 39 }, 0, null, null, "admin" });
+                values: new object[,]
+                {
+                    { 1, "Administrator", new byte[] { 137, 24, 11, 117, 186, 133, 166, 44, 180, 241, 70, 149, 120, 226, 77, 217, 4, 142, 123, 149, 4, 173, 21, 24, 13, 219, 101, 111, 63, 70, 162, 48 }, new byte[] { 75, 180, 23, 138, 140, 83, 101, 7, 171, 19, 103, 8, 169, 181, 106, 39 }, 0, null, null, "admin" },
+                    { 2, "Cashier One", new byte[] { 27, 66, 46, 142, 149, 49, 54, 0, 174, 87, 55, 142, 243, 247, 230, 75, 53, 198, 189, 123, 177, 51, 138, 109, 205, 104, 109, 238, 220, 25, 163, 216 }, new byte[] { 98, 165, 184, 48, 180, 66, 27, 105, 100, 48, 190, 207, 213, 150, 134, 53 }, 1, null, null, "cashier1" },
+                    { 3, "Kitchen Staff One", new byte[] { 212, 204, 177, 214, 180, 254, 250, 150, 234, 40, 107, 119, 249, 217, 246, 184, 62, 39, 181, 36, 10, 132, 74, 1, 6, 159, 255, 134, 140, 99, 156, 113 }, new byte[] { 83, 22, 143, 59, 77, 154, 149, 174, 62, 56, 116, 63, 113, 77, 135, 51 }, 2, null, null, "kitchen1" }
+                });
 
             migrationBuilder.InsertData(
                 table: "MenuItems",
