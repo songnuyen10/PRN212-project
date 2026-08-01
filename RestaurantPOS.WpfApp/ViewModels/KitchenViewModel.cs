@@ -19,7 +19,10 @@ public class KitchenViewModel : ViewModelBase
 
     public KitchenViewModel()
     {
-        MarkInProgressCommand = new RelayCommand(item => SetStatus((OrderItem)item!, OrderItemStatus.InProgress));
+        MarkInProgressCommand = new RelayCommand(
+            item => SetStatus((OrderItem)item!, OrderItemStatus.InProgress),
+            item => item is OrderItem orderItem && orderItem.Status != OrderItemStatus.InProgress
+        );
         MarkDoneCommand = new RelayCommand(item => SetStatus((OrderItem)item!, OrderItemStatus.Done));
 
         _ = PollLoopAsync(_cts.Token);
@@ -74,6 +77,15 @@ public class KitchenViewModel : ViewModelBase
         if (status == OrderItemStatus.Done)
         {
             Queue.Remove(item);
+        }
+        else
+        {
+            // Force the ObservableCollection to trigger a refresh for this item in the UI
+            int index = Queue.IndexOf(item);
+            if (index >= 0)
+            {
+                Queue[index] = item;
+            }
         }
     }
 
